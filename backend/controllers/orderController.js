@@ -34,12 +34,19 @@ export const createOrder = asyncHandler(async (req, res) => {
   const verifiedItems = [];
 
   for (const item of orderItems) {
+    // Validate qty is a positive integer
+    const qty = Number(item.qty);
+    if (!Number.isInteger(qty) || qty < 1) {
+      res.status(400);
+      throw new Error("Each item quantity must be a positive integer");
+    }
+
     const product = await Product.findById(item.product);
     if (!product || !product.isActive) {
       res.status(404);
       throw new Error(`Product not found: ${item.product}`);
     }
-    if (product.stock < item.qty) {
+    if (product.stock < qty) {
       res.status(400);
       throw new Error(`Not enough stock for ${product.name}`);
     }
@@ -50,10 +57,10 @@ export const createOrder = asyncHandler(async (req, res) => {
       image: product.images[0],
       price: product.price,
       size: product.size,
-      qty: item.qty,
+      qty,
     });
 
-    itemsPrice += product.price * item.qty;
+    itemsPrice += product.price * qty;
   }
 
   const shippingPrice = 0; // flat free shipping for now
@@ -78,12 +85,29 @@ export const createOrder = asyncHandler(async (req, res) => {
     notes,
   });
 
-  // Decrement stock now that the order is confirmed placed
+  // Atomically decrement stock — the filter ensures stock can't go negative.
+  // If any product fails (concurrent order grabbed the last units), roll back
+  // all previous decrements and reject the order.
+  const decremented = [];
   for (const item of verifiedItems) {
-    await Product.updateOne(
-      { _id: item.product },
+    const result = await Product.updateOne(
+      { _id: item.product, stock: { $gte: item.qty } },
       { $inc: { stock: -item.qty } }
     );
+    if (result.modifiedCount === 0) {
+      // Roll back items already decremented
+      for (const prev of decremented) {
+        await Product.updateOne(
+          { _id: prev.product },
+          { $inc: { stock: prev.qty } }
+        );
+      }
+      // Remove the order we just created — it can't be fulfilled
+      await Order.findByIdAndDelete(order._id);
+      res.status(409);
+      throw new Error(`Stock no longer available for ${item.name}. Please try again.`);
+    }
+    decremented.push(item);
   }
 
   res.status(201).json(order);
@@ -145,6 +169,16 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
   if (!order) {
     res.status(404);
     throw new Error("Order not found");
+  }
+
+  // Restore stock when an order is cancelled
+  if (orderStatus === "cancelled" && order.orderStatus !== "cancelled") {
+    for (const item of order.orderItems) {
+      await Product.updateOne(
+        { _id: item.product },
+        { $inc: { stock: item.qty } }
+      );
+    }
   }
 
   order.orderStatus = orderStatus;

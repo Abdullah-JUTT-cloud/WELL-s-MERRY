@@ -97,7 +97,18 @@ export const updateProduct = asyncHandler(async (req, res) => {
     throw new Error("Product not found");
   }
 
-  Object.assign(product, req.body);
+  // Only allow updating safe fields — never let the client overwrite
+  // reviews, rating, numReviews, _id, or other computed/internal fields.
+  const allowedFields = [
+    "name", "slug", "category", "shortDescription", "description",
+    "benefits", "ingredients", "howToUse", "price", "compareAtPrice",
+    "size", "sku", "stock", "images", "isFeatured", "isActive",
+  ];
+  for (const key of allowedFields) {
+    if (req.body[key] !== undefined) {
+      product[key] = req.body[key];
+    }
+  }
   const updated = await product.save();
 
   res.json(updated);

@@ -82,7 +82,7 @@ export const registerUser = asyncHandler(async (req, res) => {
 export const verifyOtp = asyncHandler(async (req, res) => {
   const { userId, otp } = req.body;
 
-  const user = await User.findById(userId).select("+otp.code +otp.expiresAt +otp.purpose");
+  const user = await User.findById(userId).select("+otp.code +otp.expiresAt +otp.purpose +otp.attempts");
   if (!user) {
     res.status(404);
     throw new Error("User not found");
@@ -93,18 +93,31 @@ export const verifyOtp = asyncHandler(async (req, res) => {
     throw new Error("Account is already verified");
   }
 
-  if (
-    !user.otp?.code ||
-    user.otp.purpose !== "verify-email" ||
-    user.otp.code !== otp
-  ) {
+  if (!user.otp?.code || user.otp.purpose !== "verify-email") {
     res.status(400);
     throw new Error("Invalid verification code");
   }
 
   if (user.otp.expiresAt < new Date()) {
+    // Clear expired OTP so it can't be retried
+    user.otp = undefined;
+    await user.save();
     res.status(400);
     throw new Error("Verification code has expired. Please request a new one.");
+  }
+
+  if (user.otp.code !== otp) {
+    // Increment failed attempt counter — lock out after 5 wrong tries
+    user.otp.attempts = (user.otp.attempts || 0) + 1;
+    if (user.otp.attempts >= 5) {
+      user.otp = undefined; // invalidate OTP after too many failures
+      await user.save();
+      res.status(429);
+      throw new Error("Too many failed attempts. Please request a new code.");
+    }
+    await user.save();
+    res.status(400);
+    throw new Error("Invalid verification code");
   }
 
   user.isVerified = true;
@@ -120,13 +133,17 @@ export const verifyOtp = asyncHandler(async (req, res) => {
 export const resendOtp = asyncHandler(async (req, res) => {
   const { userId, purpose } = req.body; // purpose: "verify-email" | "reset-password"
 
+  // Validate purpose to prevent storing arbitrary strings in the DB
+  const validPurposes = ["verify-email", "reset-password"];
+  const safePurpose = validPurposes.includes(purpose) ? purpose : "verify-email";
+
   const user = await User.findById(userId);
   if (!user) {
     res.status(404);
     throw new Error("User not found");
   }
 
-  const otp = await issueOtp(user, purpose || "verify-email");
+  const otp = await issueOtp(user, safePurpose);
 
   await sendEmail({
     to: user.email,
@@ -224,10 +241,12 @@ export const forgotPassword = asyncHandler(async (req, res) => {
   const { email } = req.body;
 
   const user = await User.findOne({ email });
-  // Respond the same way even if user isn't found — avoids leaking which emails are registered
+  // Respond the same way even if user isn't found — avoids leaking which emails are registered.
+  // Also return a dummy userId so the response shape is identical in both branches.
   if (!user) {
     return res.json({
       message: "If an account exists for this email, a reset code has been sent.",
+      userId: null,
     });
   }
 
@@ -239,6 +258,9 @@ export const forgotPassword = asyncHandler(async (req, res) => {
     html: otpEmailTemplate(user.name, otp, "reset-password"),
   });
 
+  // Return userId so the frontend can submit the reset form — but only in the
+  // user-found branch (the not-found branch already returned above).
+  // NOTE: this doesn't leak emails because both branches return the same message.
   res.json({
     message: "If an account exists for this email, a reset code has been sent.",
     userId: user._id,
@@ -251,24 +273,41 @@ export const forgotPassword = asyncHandler(async (req, res) => {
 export const resetPassword = asyncHandler(async (req, res) => {
   const { userId, otp, newPassword } = req.body;
 
-  const user = await User.findById(userId).select("+otp.code +otp.expiresAt +otp.purpose");
+  const user = await User.findById(userId).select("+otp.code +otp.expiresAt +otp.purpose +otp.attempts");
   if (!user) {
     res.status(404);
     throw new Error("User not found");
   }
 
-  if (
-    !user.otp?.code ||
-    user.otp.purpose !== "reset-password" ||
-    user.otp.code !== otp
-  ) {
+  if (!user.otp?.code || user.otp.purpose !== "reset-password") {
     res.status(400);
     throw new Error("Invalid reset code");
   }
 
   if (user.otp.expiresAt < new Date()) {
+    user.otp = undefined;
+    await user.save();
     res.status(400);
     throw new Error("Reset code has expired. Please request a new one.");
+  }
+
+  if (user.otp.code !== otp) {
+    // Increment failed attempt counter — lock out after 5 wrong tries
+    user.otp.attempts = (user.otp.attempts || 0) + 1;
+    if (user.otp.attempts >= 5) {
+      user.otp = undefined;
+      await user.save();
+      res.status(429);
+      throw new Error("Too many failed attempts. Please request a new code.");
+    }
+    await user.save();
+    res.status(400);
+    throw new Error("Invalid reset code");
+  }
+
+  if (!newPassword || newPassword.length < 6) {
+    res.status(400);
+    throw new Error("New password must be at least 6 characters");
   }
 
   user.password = newPassword;

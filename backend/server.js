@@ -22,7 +22,7 @@ app.use(cors({
   credentials: true,
 }));
 
-app.use(express.json());
+app.use(express.json({ limit: "1mb" })); // prevent oversized payloads (DoS protection)
 app.use(cookieParser());
 
 if (process.env.NODE_ENV === "development") {

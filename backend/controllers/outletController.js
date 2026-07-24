@@ -8,7 +8,7 @@ export const getOutlets = asyncHandler(async (req, res) => {
   const { city } = req.query;
 
   const filter = { isActive: true };
-  if (city) filter.city = new RegExp(`^${city}$`, "i"); // case-insensitive exact match
+  if (city) filter.city = { $regex: `^${city.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, $options: "i" }; // escape user input to prevent ReDoS
 
   const outlets = await Outlet.find(filter).sort({ city: 1, name: 1 });
   res.json(outlets);

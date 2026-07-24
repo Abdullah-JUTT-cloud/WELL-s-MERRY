@@ -63,6 +63,7 @@ const userSchema = new mongoose.Schema(
         enum: ["verify-email", "reset-password"],
         select: false,
       },
+      attempts: { type: Number, default: 0, select: false },
     },
     addresses: [addressSchema],
     refreshToken: {

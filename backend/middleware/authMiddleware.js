@@ -36,12 +36,14 @@ export const protect = asyncHandler(async (req, res, next) => {
 });
 
 // Restricts a route to admins only. Must be used AFTER `protect`.
+// Uses next(error) instead of throw so Express catches it in sync middleware.
 export const adminOnly = (req, res, next) => {
   if (req.user && req.user.role === "admin") {
     return next();
   }
   res.status(403);
-  throw new Error("Not authorized as an admin");
+  const error = new Error("Not authorized as an admin");
+  next(error);
 };
 
 // Allows guest checkout: attaches req.user if a valid token is present,
