@@ -34,21 +34,41 @@ export const registerUser = asyncHandler(async (req, res) => {
     throw new Error("Name, email and password are required");
   }
 
-  const existing = await User.findOne({ email });
-  if (existing) {
+  let user = await User.findOne({ email });
+
+  if (user && user.isVerified) {
     res.status(400);
     throw new Error("An account with this email already exists");
   }
 
-  const user = await User.create({ name, email, password, phone });
+  // If a user exists but never verified (e.g. the OTP email failed last time),
+  // reuse that record instead of blocking re-registration forever.
+  if (user && !user.isVerified) {
+    user.name = name;
+    user.password = password;
+    user.phone = phone;
+    await user.save();
+  } else {
+    user = await User.create({ name, email, password, phone });
+  }
 
   const otp = await issueOtp(user, "verify-email");
 
-  await sendEmail({
-    to: user.email,
-    subject: "Verify your Well's Merry account",
-    html: otpEmailTemplate(user.name, otp, "verify-email"),
-  });
+  try {
+    await sendEmail({
+      to: user.email,
+      subject: "Verify your Well's Merry account",
+      html: otpEmailTemplate(user.name, otp, "verify-email"),
+    });
+  } catch (emailError) {
+    console.error("Failed to send OTP email:", emailError.message);
+    res.status(201).json({
+      message:
+        "Account created, but we couldn't send the verification email. Please use 'Resend OTP'.",
+      userId: user._id,
+    });
+    return;
+  }
 
   res.status(201).json({
     message: "Account created. Please check your email for the verification code.",
@@ -195,7 +215,7 @@ export const logoutUser = asyncHandler(async (req, res) => {
   }
   res.clearCookie("refreshToken");
   res.json({ message: "Logged out successfully" });
-});
+}); 
 
 // @desc    Request password reset OTP
 // @route   POST /api/auth/forgot-password
