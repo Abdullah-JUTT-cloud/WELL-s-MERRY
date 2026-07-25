@@ -27,7 +27,7 @@ const issueOtp = async (user, purpose) => {
 // @route   POST /api/auth/register
 // @access  Public
 export const registerUser = asyncHandler(async (req, res) => {
-  const { name, email, password, phone } = req.body;
+  const { name, email, password, phone, address } = req.body;
 
   if (!name || !email || !password) {
     res.status(400);
@@ -41,15 +41,36 @@ export const registerUser = asyncHandler(async (req, res) => {
     throw new Error("An account with this email already exists");
   }
 
+  // Build default address if provided
+  const defaultAddress =
+    address && address.street && address.city
+      ? {
+          label: "Home",
+          fullName: name,
+          phone: phone || "",
+          street: address.street,
+          city: address.city,
+          postalCode: address.postalCode || "",
+          isDefault: true,
+        }
+      : null;
+
   // If a user exists but never verified (e.g. the OTP email failed last time),
   // reuse that record instead of blocking re-registration forever.
   if (user && !user.isVerified) {
     user.name = name;
     user.password = password;
     user.phone = phone;
+    if (defaultAddress) user.addresses = [defaultAddress];
     await user.save();
   } else {
-    user = await User.create({ name, email, password, phone });
+    user = await User.create({
+      name,
+      email,
+      password,
+      phone,
+      addresses: defaultAddress ? [defaultAddress] : [],
+    });
   }
 
   const otp = await issueOtp(user, "verify-email");
@@ -194,13 +215,16 @@ export const loginUser = asyncHandler(async (req, res) => {
 
   setRefreshTokenCookie(res, refreshToken);
 
+  const fullUser = await User.findById(user._id);
   res.json({
     accessToken,
     user: {
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
+      id: fullUser._id,
+      name: fullUser.name,
+      email: fullUser.email,
+      phone: fullUser.phone,
+      role: fullUser.role,
+      addresses: fullUser.addresses,
     },
   });
 });

@@ -35,19 +35,6 @@ const TESTIMONIALS = [
   { name: "Sana, Islamabad", rating: 4, text: "Good quality oil, a little goes a long way. Would love to see a bigger bottle size in future." },
 ];
 
-// Fallback shown only if the API returns nothing yet (e.g. before the
-// database is seeded) — so the homepage never looks broken/empty during
-// early development. Once real products exist in the DB, this is unused.
-const FALLBACK_PRODUCT = {
-  _id: "fallback-hair-oil",
-  slug: "hair-care-oil",
-  name: "Well's Merry Hair Care Oil",
-  price: 1880,
-  size: "200ml",
-  images: [heroBottle],
-  isFallback: true,
-};
-
 const Home = () => {
   const { addItem } = useCart();
   const [featured, setFeatured] = useState([]);
@@ -58,23 +45,17 @@ const Home = () => {
     (async () => {
       try {
         const data = await getProducts({ featured: true });
-        if (!ignore) setFeatured(data.length ? data : [FALLBACK_PRODUCT]);
+        if (!ignore) setFeatured(data);
       } catch {
-        if (!ignore) setFeatured([FALLBACK_PRODUCT]);
+        // silently fail — section just won't render
       } finally {
         if (!ignore) setLoadingProducts(false);
       }
     })();
-    return () => {
-      ignore = true; // avoids setting state on an unmounted component if navigation happens mid-fetch
-    };
+    return () => { ignore = true; };
   }, []);
 
   const handleQuickAdd = (product) => {
-    if (product.isFallback) {
-      toast("This product is being finalized — visit the shop soon!", { icon: "🌿" });
-      return;
-    }
     addItem(product, 1);
   };
 

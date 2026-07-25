@@ -5,7 +5,10 @@ import { useAuth } from "../context/AuthContext.jsx";
 import FormField from "../components/FormField.jsx";
 import logo from "../assets/logo.jpg";
 
-const EMPTY_FORM = { name: "", email: "", phone: "", password: "", confirmPassword: "" };
+const EMPTY_FORM = {
+  name: "", email: "", phone: "", password: "", confirmPassword: "",
+  street: "", city: "", postalCode: "",
+};
 
 const Register = () => {
   const { register } = useAuth();
@@ -32,6 +35,8 @@ const Register = () => {
     if (!form.password) next.password = "Password is required";
     else if (form.password.length < 6) next.password = "Password must be at least 6 characters";
     if (form.confirmPassword !== form.password) next.confirmPassword = "Passwords do not match";
+    if (!form.street.trim()) next.street = "Street address is required";
+    if (!form.city.trim()) next.city = "City is required";
     setErrors(next);
     return Object.keys(next).length === 0;
   };
@@ -47,6 +52,11 @@ const Register = () => {
         email: form.email.trim(),
         phone: form.phone.trim() || undefined,
         password: form.password,
+        address: {
+          street: form.street.trim(),
+          city: form.city.trim(),
+          postalCode: form.postalCode.trim() || undefined,
+        },
       });
 
       toast.success(data.message || "Account created! Check your email for a code.");
@@ -76,50 +86,22 @@ const Register = () => {
           </div>
         )}
 
-        <FormField
-          label="Full Name"
-          name="name"
-          value={form.name}
-          onChange={handleChange}
-          error={errors.name}
-          autoComplete="name"
-        />
-        <FormField
-          label="Email"
-          name="email"
-          type="email"
-          value={form.email}
-          onChange={handleChange}
-          error={errors.email}
-          autoComplete="email"
-        />
-        <FormField
-          label="Phone Number (optional)"
-          name="phone"
-          value={form.phone}
-          onChange={handleChange}
-          error={errors.phone}
-          placeholder="03XX XXXXXXX"
-          autoComplete="tel"
-        />
-        <FormField
-          label="Password"
-          name="password"
-          type="password"
-          value={form.password}
-          onChange={handleChange}
-          error={errors.password}
-          autoComplete="new-password"
-        />
-        <FormField
-          label="Confirm Password"
-          name="confirmPassword"
-          type="password"
-          value={form.confirmPassword}
-          onChange={handleChange}
-          error={errors.confirmPassword}
-          autoComplete="new-password"
-        />
+        <FormField label="Full Name" name="name" value={form.name} onChange={handleChange} error={errors.name} autoComplete="name" />
+        <FormField label="Email" name="email" type="email" value={form.email} onChange={handleChange} error={errors.email} autoComplete="email" />
+        <FormField label="Phone Number (optional)" name="phone" value={form.phone} onChange={handleChange} error={errors.phone} placeholder="03XX XXXXXXX" autoComplete="tel" />
+        <FormField label="Password" name="password" type="password" value={form.password} onChange={handleChange} error={errors.password} autoComplete="new-password" />
+        <FormField label="Confirm Password" name="confirmPassword" type="password" value={form.confirmPassword} onChange={handleChange} error={errors.confirmPassword} autoComplete="new-password" />
+
+        <div className="pt-2">
+          <p className="text-[12px] tracking-[0.08em] uppercase text-ink/50 mb-4 font-medium">Home / Delivery Address</p>
+          <div className="space-y-4">
+            <FormField label="Street Address*" name="street" value={form.street} onChange={handleChange} error={errors.street} autoComplete="street-address" placeholder="House #, Street, Area" />
+            <div className="grid grid-cols-2 gap-4">
+              <FormField label="City*" name="city" value={form.city} onChange={handleChange} error={errors.city} autoComplete="address-level2" />
+              <FormField label="Postal Code" name="postalCode" value={form.postalCode} onChange={handleChange} autoComplete="postal-code" />
+            </div>
+          </div>
+        </div>
 
         <button type="submit" disabled={submitting} className="btn btn-dark w-full">
           {submitting ? "Creating Account..." : "Create Account"}

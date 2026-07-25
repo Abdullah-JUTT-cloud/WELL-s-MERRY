@@ -5,12 +5,14 @@ import { Toaster } from "react-hot-toast";
 import App from "./App.jsx";
 import { AuthProvider } from "./context/AuthContext.jsx";
 import { CartProvider } from "./context/CartContext.jsx";
+import { AdminProvider } from "./context/AdminContext.jsx";
 import "./index.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <BrowserRouter>
       <AuthProvider>
+        <AdminProvider>
         <CartProvider>
           <App />
           <Toaster
@@ -29,6 +31,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
             }}
           />
         </CartProvider>
+        </AdminProvider>
       </AuthProvider>
     </BrowserRouter>
   </React.StrictMode>

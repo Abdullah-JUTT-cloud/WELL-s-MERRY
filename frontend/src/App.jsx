@@ -1,17 +1,12 @@
 import { Suspense, lazy } from "react";
-import { Routes, Route, Outlet, useLocation } from "react-router-dom";
+import { Routes, Route, Outlet, useLocation, Navigate } from "react-router-dom";
 import { useEffect } from "react";
 import Header from "./components/Header.jsx";
 import Footer from "./components/Footer.jsx";
 import WhatsAppFloat from "./components/WhatsAppFloat.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import { useAdmin } from "./context/AdminContext.jsx";
 
-// Real pages, added incrementally as each one is built.
-// Using React.lazy means each page is its own JS chunk — the browser
-// only downloads the Home page's code on first load, not the entire
-// site's worth of pages upfront. Meaningful for mobile users on slower
-// connections, which matters given a large part of our audience will
-// be on mobile in Pakistan.
 const Home = lazy(() => import("./pages/Home.jsx"));
 const Shop = lazy(() => import("./pages/Shop.jsx"));
 const ProductDetail = lazy(() => import("./pages/ProductDetail.jsx"));
@@ -27,9 +22,13 @@ const Outlets = lazy(() => import("./pages/Outlets.jsx"));
 const About = lazy(() => import("./pages/About.jsx"));
 const Orders = lazy(() => import("./pages/Orders.jsx"));
 
-// Temporary stand-in for pages not yet built. Once a real page exists,
-// its <Route> below gets updated to import the real component instead —
-// this placeholder is never meant to ship.
+// Admin pages
+const AdminLogin = lazy(() => import("./pages/admin/AdminLogin.jsx"));
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard.jsx"));
+const AdminProducts = lazy(() => import("./pages/admin/AdminProducts.jsx"));
+const AdminOrders = lazy(() => import("./pages/admin/AdminOrders.jsx"));
+const AdminOrderDetail = lazy(() => import("./pages/admin/AdminOrderDetail.jsx"));
+
 const ComingSoon = ({ label }) => (
   <div className="container-content min-h-[50vh] flex flex-col items-center justify-center text-center py-24">
     <p className="eyebrow mb-3">Well's Merry</p>
@@ -38,10 +37,6 @@ const ComingSoon = ({ label }) => (
   </div>
 );
 
-// React Router doesn't auto-scroll to top on navigation like a traditional
-// multi-page site would — without this, clicking from a long Shop page
-// into a Product page would land the user mid-scroll on the new page,
-// which reads as broken.
 const ScrollToTop = () => {
   const { pathname } = useLocation();
   useEffect(() => {
@@ -50,9 +45,6 @@ const ScrollToTop = () => {
   return null;
 };
 
-// Shared shell: Header + Footer render once and persist across route
-// changes; only the <Outlet /> content swaps. Avoids Header/Footer
-// remounting (and re-running their effects/animations) on every navigation.
 const Layout = () => (
   <div className="flex flex-col min-h-screen">
     <ScrollToTop />
@@ -71,20 +63,25 @@ const PageFallback = () => (
   </div>
 );
 
+// Guard for admin-only routes
+const AdminRoute = ({ children }) => {
+  const { isAdmin, loading } = useAdmin();
+  if (loading) return <PageFallback />;
+  return isAdmin ? children : <Navigate to="/admin/login" replace />;
+};
+
 function App() {
   return (
     <Suspense fallback={<PageFallback />}>
       <Routes>
+        {/* Public site */}
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
           <Route path="/shop" element={<Shop />} />
           <Route path="/products/:slug" element={<ProductDetail />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
-          <Route
-            path="/order-confirmation/:id"
-            element={<OrderConfirmation />}
-          />
+          <Route path="/order-confirmation/:id" element={<OrderConfirmation />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/outlets" element={<Outlets />} />
@@ -97,6 +94,13 @@ function App() {
           </Route>
           <Route path="*" element={<ComingSoon label="Page Not Found" />} />
         </Route>
+
+        {/* Admin — no site Header/Footer */}
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+        <Route path="/admin/products" element={<AdminRoute><AdminProducts /></AdminRoute>} />
+        <Route path="/admin/orders" element={<AdminRoute><AdminOrders /></AdminRoute>} />
+        <Route path="/admin/orders/:id" element={<AdminRoute><AdminOrderDetail /></AdminRoute>} />
       </Routes>
     </Suspense>
   );

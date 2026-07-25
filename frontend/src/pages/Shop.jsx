@@ -1,10 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import toast from "react-hot-toast";
 import { getProducts } from "../api/products.js";
 import { useCart } from "../context/CartContext.jsx";
 import ProductCard from "../components/ProductCard.jsx";
-import heroBottle from "../assets/oil-lying-pump.jpg";
 
 const CATEGORIES = [
   { value: "", label: "All Products" },
@@ -12,26 +10,6 @@ const CATEGORIES = [
   { value: "skin-care", label: "Skin Care" },
   { value: "body-care", label: "Body Care" },
 ];
-
-// Shown alongside real products so the shop never looks sparse with
-// only one live item — communicates "more is coming" rather than
-// looking like an unfinished or abandoned store.
-const GHOST_SLOTS = [
-  { label: "Skin Care — Coming Soon" },
-  { label: "Body Care — Coming Soon" },
-];
-
-const FALLBACK_PRODUCT = {
-  _id: "fallback-hair-oil",
-  slug: "hair-care-oil",
-  name: "Well's Merry Hair Care Oil",
-  category: "hair-care",
-  price: 1880,
-  size: "200ml",
-  stock: 25,
-  images: [heroBottle],
-  isFallback: true,
-};
 
 const Shop = () => {
   const { addItem } = useCart();
@@ -51,13 +29,7 @@ const Shop = () => {
       try {
         const params = activeCategory ? { category: activeCategory } : {};
         const data = await getProducts(params);
-        if (ignore) return;
-
-        if (data.length === 0 && (!activeCategory || activeCategory === "hair-care")) {
-          setProducts([FALLBACK_PRODUCT]);
-        } else {
-          setProducts(data);
-        }
+        if (!ignore) setProducts(data);
       } catch {
         if (!ignore) setError(true);
       } finally {
@@ -65,16 +37,10 @@ const Shop = () => {
       }
     })();
 
-    return () => {
-      ignore = true;
-    };
+    return () => { ignore = true; };
   }, [activeCategory]);
 
   const handleAdd = (product) => {
-    if (product.isFallback) {
-      toast("This product is being finalized — check back very soon!", { icon: "🌿" });
-      return;
-    }
     addItem(product, 1);
   };
 
@@ -82,11 +48,6 @@ const Shop = () => {
     if (value) setSearchParams({ category: value });
     else setSearchParams({});
   };
-
-  const showGhostSlots = useMemo(
-    () => !activeCategory || activeCategory !== "hair-care",
-    [activeCategory]
-  );
 
   return (
     <div>
@@ -143,16 +104,6 @@ const Shop = () => {
             {products.map((product) => (
               <ProductCard key={product._id} product={product} onAdd={handleAdd} />
             ))}
-
-            {showGhostSlots &&
-              GHOST_SLOTS.map((slot) => (
-                <div
-                  key={slot.label}
-                  className="border border-dashed border-cream-dim flex flex-col items-center justify-center text-center p-10 aspect-square sm:aspect-auto"
-                >
-                  <span className="font-display italic text-ink/40">{slot.label}</span>
-                </div>
-              ))}
           </div>
         )}
       </div>

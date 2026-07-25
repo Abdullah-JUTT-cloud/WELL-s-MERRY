@@ -6,7 +6,6 @@ import { FaWhatsapp } from "react-icons/fa";
 import { getProductBySlug } from "../api/products.js";
 import { useCart } from "../context/CartContext.jsx";
 import { buildWhatsAppLink } from "../config/siteConfig.js";
-import { FALLBACK_PRODUCT } from "../data/productFallback.js";
 import Accordion from "../components/Accordion.jsx";
 
 const ProductDetail = () => {
@@ -31,14 +30,7 @@ const ProductDetail = () => {
         const data = await getProductBySlug(slug);
         if (!ignore) setProduct(data);
       } catch {
-        // If it's specifically our known placeholder slug, show the
-        // fallback rather than a hard 404 — this is the one product
-        // we know is "real," just not seeded in the DB yet.
-        if (!ignore && slug === FALLBACK_PRODUCT.slug) {
-          setProduct(FALLBACK_PRODUCT);
-        } else if (!ignore) {
-          setNotFound(true);
-        }
+        if (!ignore) setNotFound(true);
       } finally {
         if (!ignore) setLoading(false);
       }
@@ -53,10 +45,6 @@ const ProductDetail = () => {
   const increaseQty = () => setQty((q) => Math.min(product?.stock || 99, q + 1));
 
   const handleAddToCart = () => {
-    if (product.isFallback) {
-      toast("This product is being finalized — check back very soon!", { icon: "🌿" });
-      return;
-    }
     addItem(product, qty);
   };
 
@@ -91,7 +79,7 @@ const ProductDetail = () => {
     );
   }
 
-  const outOfStock = !product.isFallback && product.stock === 0;
+  const outOfStock = product.stock === 0;
 
   return (
     <div className="container-content py-10 sm:py-16">
@@ -175,7 +163,7 @@ const ProductDetail = () => {
                     <HiOutlinePlus className="w-4 h-4" />
                   </button>
                 </div>
-                {!product.isFallback && product.stock <= 5 && (
+                {product.stock <= 5 && (
                   <span className="text-[12.5px] text-gold-1">Only {product.stock} left in stock</span>
                 )}
               </div>
