@@ -75,7 +75,19 @@ export const registerUser = asyncHandler(async (req, res) => {
     userId: user._id,
   });
 });
-
+// @desc    Get the currently logged-in user's profile
+// @route   GET /api/auth/me
+// @access  Private
+export const getMe = asyncHandler(async (req, res) => {
+  res.json({
+    id: req.user._id,
+    name: req.user.name,
+    email: req.user.email,
+    phone: req.user.phone,
+    role: req.user.role,
+    addresses: req.user.addresses,
+  });
+});
 // @desc    Verify email using OTP
 // @route   POST /api/auth/verify-otp
 // @access  Public

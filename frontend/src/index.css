@@ -1,0 +1,96 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==========================================================
+   Well's Merry — Global base styles
+   Design language: organic luxury. Ink black + antique gold +
+   ivory, with a moss accent reserved for "100% Organic" moments.
+   ========================================================== */
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-display font-medium tracking-tight text-ink;
+  }
+
+  ::selection {
+    @apply bg-gold-2 text-ink;
+  }
+
+  /* Custom scrollbar — subtle, on-brand, not the default browser gray */
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-ivory;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-cream-dim rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-gold-1;
+  }
+
+  /* Respect users who've asked their OS to reduce motion —
+     accessibility, not optional polish */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* Reusable button variants — kept as components, not scattered
+     utility strings, so every CTA across 20+ files stays consistent
+     if the brand style changes later. */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 px-8 py-4
+           text-[13px] tracking-[0.16em] uppercase font-semibold
+           rounded-sm transition-transform duration-300 ease-out
+           disabled:opacity-40 disabled:pointer-events-none;
+  }
+  .btn:hover {
+    @apply -translate-y-0.5;
+  }
+  .btn-dark {
+    @apply bg-ink text-ivory border border-ink hover:bg-ink-soft;
+  }
+  .btn-gold {
+    @apply bg-gold-gradient bg-[length:200%_100%] bg-left text-ink
+           hover:bg-right transition-[background-position] duration-500;
+  }
+  .btn-outline {
+    @apply bg-transparent border border-ink text-ink hover:bg-ink hover:text-ivory;
+  }
+  .btn-outline-light {
+    @apply bg-transparent border border-ivory/40 text-ivory hover:bg-ivory hover:text-ink;
+  }
+
+  .eyebrow {
+    @apply block text-[12px] tracking-widest2 uppercase text-gold-1 font-semibold;
+  }
+
+  .container-content {
+    @apply max-w-content mx-auto px-6 md:px-8;
+  }
+
+  /* Scroll-reveal utility: elements start hidden/offset, and a small
+     IntersectionObserver hook (useReveal) adds .is-visible when
+     they enter the viewport. Pure CSS transition, no animation library. */
+  .reveal {
+    @apply opacity-0 translate-y-6 transition-all duration-700 ease-out;
+  }
+  .reveal.is-visible {
+    @apply opacity-100 translate-y-0;
+  }
+}
