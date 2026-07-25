@@ -43,8 +43,8 @@ export const AuthProvider = ({ children }) => {
     return () => window.removeEventListener("wm:session-expired", handleExpired);
   }, []);
 
-  const register = useCallback(async ({ name, email, password, phone }) => {
-    const { data } = await api.post("/auth/register", { name, email, password, phone });
+  const register = useCallback(async ({ name, email, password, phone, address }) => {
+    const { data } = await api.post("/auth/register", { name, email, password, phone, address });
     return data; // { message, userId }
   }, []);
 

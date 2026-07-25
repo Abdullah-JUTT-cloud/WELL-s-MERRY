@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext.jsx";
-import logo from "../assets/logo.jpg";
+import logo from "../assets/nav-up.png";
 
 const OTP_LENGTH = 6;
 const RESEND_COOLDOWN = 30; // seconds

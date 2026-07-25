@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext.jsx";
 import FormField from "../components/FormField.jsx";
-import logo from "../assets/logo.jpg";
+import logo from "../assets/nav-up.png";
 
 const EMPTY_FORM = {
   name: "", email: "", phone: "", password: "", confirmPassword: "",

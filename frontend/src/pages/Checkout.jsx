@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { HiOutlineTruck, HiOutlineChatBubbleLeftRight, HiOutlineCreditCard, HiOutlineLockClosed } from "react-icons/hi2";
@@ -22,6 +22,10 @@ const Checkout = () => {
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
+  // Find user's default/home address
+  const homeAddress = user?.addresses?.find((a) => a.isDefault) || user?.addresses?.[0] || null;
+
+  const [useHomeAddress, setUseHomeAddress] = useState(!!homeAddress);
   const [form, setForm] = useState({
     ...EMPTY_FORM,
     fullName: user?.name || "",
@@ -31,6 +35,29 @@ const Checkout = () => {
   const [paymentMethod, setPaymentMethod] = useState("cod");
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
+
+  // Pre-fill from home address when checkbox is toggled on or on first load
+  useEffect(() => {
+    if (useHomeAddress && homeAddress) {
+      setForm((f) => ({
+        ...f,
+        fullName: homeAddress.fullName || user?.name || f.fullName,
+        phone: homeAddress.phone || user?.phone || f.phone,
+        street: homeAddress.street || "",
+        city: homeAddress.city || "",
+        postalCode: homeAddress.postalCode || "",
+      }));
+    }
+  }, [useHomeAddress, homeAddress, user]);
+
+  const handleUseHomeToggle = (e) => {
+    const checked = e.target.checked;
+    setUseHomeAddress(checked);
+    if (!checked) {
+      // Clear address fields so user can type a new one
+      setForm((f) => ({ ...f, street: "", city: "", postalCode: "" }));
+    }
+  };
 
   if (items.length === 0) {
     return (
@@ -146,6 +173,24 @@ const Checkout = () => {
         <div>
           <h3 className="text-[13px] tracking-[0.1em] uppercase font-medium mb-5">Shipping Details</h3>
 
+          {/* Use home address checkbox — only show if user has a saved address */}
+          {isAuthenticated && homeAddress && (
+            <label className="flex items-center gap-3 mb-6 cursor-pointer select-none bg-cream border border-cream-dim px-4 py-3 rounded-sm">
+              <input
+                type="checkbox"
+                checked={useHomeAddress}
+                onChange={handleUseHomeToggle}
+                className="accent-gold-1 w-4 h-4 shrink-0"
+              />
+              <span className="text-[13.5px] text-ink/70">
+                Delivery address is the same as my home address
+                <span className="block text-[12px] text-ink/45 mt-0.5">
+                  {homeAddress.street}, {homeAddress.city}{homeAddress.postalCode ? ` ${homeAddress.postalCode}` : ""}
+                </span>
+              </span>
+            </label>
+          )}
+
           <div className="grid sm:grid-cols-2 gap-5 mb-5">
             <Field label="Full Name" name="fullName" value={form.fullName} onChange={handleChange} error={errors.fullName} />
             <Field label="Phone Number" name="phone" value={form.phone} onChange={handleChange} error={errors.phone} placeholder="03XX XXXXXXX" />
@@ -164,12 +209,12 @@ const Checkout = () => {
           </div>
 
           <div className="mb-5">
-            <Field label="Street Address" name="street" value={form.street} onChange={handleChange} error={errors.street} />
+            <Field label="Street Address" name="street" value={form.street} onChange={handleChange} error={errors.street} disabled={useHomeAddress} />
           </div>
 
           <div className="grid sm:grid-cols-2 gap-5 mb-5">
-            <Field label="City" name="city" value={form.city} onChange={handleChange} error={errors.city} />
-            <Field label="Postal Code (optional)" name="postalCode" value={form.postalCode} onChange={handleChange} />
+            <Field label="City" name="city" value={form.city} onChange={handleChange} error={errors.city} disabled={useHomeAddress} />
+            <Field label="Postal Code (optional)" name="postalCode" value={form.postalCode} onChange={handleChange} disabled={useHomeAddress} />
           </div>
 
           <div className="mb-8">

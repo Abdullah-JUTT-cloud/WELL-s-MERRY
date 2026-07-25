@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import toast from "react-hot-toast";
-// Add this import near the top with the other imports:
 import ProductCard from "../components/ProductCard.jsx";
 import {
   HiOutlineSparkles,
@@ -15,10 +13,36 @@ import { useReveal } from "../hooks/useReveal.js";
 import { useCart } from "../context/CartContext.jsx";
 import { getProducts } from "../api/products.js";
 
-import heroBottle from "../assets/oil-lying-pump.jpg";
+import slide1Img from "../assets/11.png";
+import slide2Img from "../assets/2.png";
 import spotlightImg from "../assets/oil-box-bottle-standing.jpg";
 import ingredientsImg from "../assets/oil-ingredients-label.jpg";
 import flatlayImg from "../assets/oil-flatlay-diagonal.jpg";
+
+const HERO_SLIDES = [
+  {
+    id: 1,
+    tagline: "— 100% ORGANIC CARE",
+    title: "HAIR CARE OIL",
+    subtext: "Deeply moisturizing botanical oil crafted with rice bran, sweet almond, jojoba, and argan for softness, shine, and root strength.",
+    primaryCta: "SHOP HAIR OIL",
+    primaryLink: "/shop",
+    secondaryCta: "EXPLORE OUTLETS",
+    secondaryLink: "/outlets",
+    image: slide1Img,
+  },
+  {
+    id: 2,
+    tagline: "— NEW BOTANICAL FORMULA",
+    title: "ORGANIC SHAMPOO",
+    subtext: "Pure botanical hair cleanser engineered to gently cleanse, restore scalp balance, and revive natural volume without harsh chemicals.",
+    primaryCta: "SHOP SHAMPOO",
+    primaryLink: "/shop",
+    secondaryCta: "VIEW COLLECTION",
+    secondaryLink: "/shop",
+    image: slide2Img,
+  },
+];
 
 const BENEFITS = [
   { icon: HiOutlineSparkles, title: "Grows New Hair", desc: "Nourishes roots to encourage healthy regrowth." },
@@ -39,6 +63,15 @@ const Home = () => {
   const { addItem } = useCart();
   const [featured, setFeatured] = useState([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  // Auto-play slider for Hero Section
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
+    }, 6000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     let ignore = false;
@@ -52,7 +85,9 @@ const Home = () => {
         if (!ignore) setLoadingProducts(false);
       }
     })();
-    return () => { ignore = true; };
+    return () => {
+      ignore = true;
+    };
   }, []);
 
   const handleQuickAdd = (product) => {
@@ -67,39 +102,92 @@ const Home = () => {
 
   return (
     <div>
-      {/* ============ HERO ============ */}
-      <section className="bg-ink text-ivory relative overflow-hidden">
-        <div className="container-content grid lg:grid-cols-2 gap-10 items-center min-h-[560px] lg:min-h-[640px] py-16 lg:py-0">
-          <div ref={heroRef} className="reveal order-2 lg:order-1">
-            <span className="eyebrow mb-4">100% Organic Hair Care</span>
-            <h1 className="font-display text-[38px] leading-[1.08] sm:text-5xl lg:text-[64px] text-ivory max-w-xl">
-              Nature's Gold, <em className="italic text-gold-3 font-normal">Poured</em> Into Every Drop
-            </h1>
-            <p className="mt-5 text-cream/70 text-base sm:text-lg max-w-md leading-relaxed">
-              Deeply moisturizing hair oil crafted from organic botanicals —
-              for softness, shine, and stronger hair, naturally.
-            </p>
-            <div className="flex flex-wrap gap-4 mt-9">
-              <Link to="/shop" className="btn btn-gold">Shop Now</Link>
-              <Link to="/about" className="btn btn-outline-light">Our Story</Link>
+      {/* ============ HERO SLIDER WITH EDGE-TO-EDGE OVERLAY ============ */}
+      <section className="relative w-full h-[620px] sm:h-[720px] lg:h-[800px] bg-ink overflow-hidden select-none -mt-[105px]">
+        {HERO_SLIDES.map((slide, index) => (
+          <div
+            key={slide.id}
+            className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out ${
+              currentSlide === index ? "opacity-100 z-10 pointer-events-auto" : "opacity-0 z-0 pointer-events-none"
+            }`}
+          >
+            {/* Full-width Background Image */}
+            <img
+              src={slide.image}
+              alt={slide.title}
+              className="absolute inset-0 w-full h-full object-cover object-center transform scale-105 transition-transform duration-[8000ms] ease-out"
+            />
+
+            {/* Seamless Dark Translucent Blur/Vignette Overlay (Covers whole picture, no vertical cut-off line!) */}
+            <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-black/85 via-black/55 to-black/35 backdrop-blur-[0.5px]" />
+            <div className="absolute inset-0 w-full h-full bg-gradient-to-t from-black/70 via-transparent to-black/40" />
+
+            {/* Slide Content Overlay */}
+            <div className="container-content h-full relative z-20 flex flex-col justify-center pt-[105px]">
+              <div
+                className={`max-w-xl transition-all duration-700 ${
+                  currentSlide === index ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+                }`}
+              >
+                {/* Category Tag */}
+                <span className="inline-block text-gold-3 text-xs sm:text-sm tracking-[0.24em] font-semibold uppercase mb-4">
+                  {slide.tagline}
+                </span>
+
+                {/* Main Product Title */}
+                <h1 className="font-display text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-white uppercase mb-4 leading-none filter drop-shadow-md">
+                  {slide.title}
+                </h1>
+
+                {/* Subtext */}
+                <p className="text-cream/90 text-sm sm:text-base lg:text-lg max-w-lg mb-9 leading-relaxed font-light drop-shadow-xs">
+                  {slide.subtext}
+                </p>
+
+                {/* CTA Buttons */}
+                <div className="flex flex-wrap items-center gap-4">
+                  <Link
+                    to={slide.primaryLink}
+                    className="bg-white text-ink hover:bg-gold-2 hover:text-ink font-semibold text-xs tracking-[0.18em] uppercase px-7 py-3.5 rounded-xs transition-all duration-300 flex items-center gap-2.5 shadow-lg group"
+                  >
+                    <span>{slide.primaryCta}</span>
+                    <span className="transition-transform duration-300 group-hover:translate-x-1">&rarr;</span>
+                  </Link>
+
+                  <Link
+                    to={slide.secondaryLink}
+                    className="border border-white/40 text-white hover:bg-white/10 font-semibold text-xs tracking-[0.18em] uppercase px-7 py-3.5 rounded-xs transition-all duration-300 flex items-center gap-2.5 group backdrop-blur-xs"
+                  >
+                    <span>{slide.secondaryCta}</span>
+                    <span className="transition-transform duration-300 group-hover:translate-x-1">&rarr;</span>
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
+        ))}
 
-          <div className="order-1 lg:order-2 relative flex items-center justify-center">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(217,172,71,0.16),transparent_65%)]" />
-            <img
-              src={heroBottle}
-              alt="Well's Merry Hair Care Oil"
-              className="relative max-h-[320px] sm:max-h-[420px] lg:max-h-[560px] w-auto object-contain drop-shadow-[0_40px_60px_rgba(0,0,0,0.5)]"
+        {/* Slide Pagination Dots (Bottom Right) */}
+        <div className="absolute bottom-6 right-6 sm:bottom-10 sm:right-12 z-30 flex items-center gap-3">
+          {HERO_SLIDES.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentSlide(index)}
+              aria-label={`Go to slide ${index + 1}`}
+              className={`transition-all duration-300 rounded-full ${
+                currentSlide === index
+                  ? "w-8 h-2 bg-white shadow-glow"
+                  : "w-2.5 h-2.5 bg-white/40 hover:bg-white/80"
+              }`}
             />
-          </div>
+          ))}
         </div>
       </section>
 
       {/* ============ TRUST MARQUEE ============ */}
       <div className="bg-espresso border-y border-gold-2/10 overflow-hidden py-4">
-        <div className="flex w-max animate-[marquee_28s_linear_infinite] hover:[animation-play-state:paused]">
-          {[...Array(2)].map((_, dupIdx) => (
+        <div className="flex w-max animate-marquee">
+          {[...Array(4)].map((_, dupIdx) => (
             <div key={dupIdx} className="flex shrink-0">
               {["100% Organic", "Made With Care", "Chemical Free", "Cash On Delivery", "WhatsApp Ordering"].map((t) => (
                 <span key={t} className="px-8 text-[13px] tracking-[0.08em] uppercase text-cream/80 whitespace-nowrap flex items-center gap-2">

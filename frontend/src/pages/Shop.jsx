@@ -5,10 +5,10 @@ import { useCart } from "../context/CartContext.jsx";
 import ProductCard from "../components/ProductCard.jsx";
 
 const CATEGORIES = [
-  { value: "", label: "All Products" },
-  { value: "hair-care", label: "Hair Care" },
-  { value: "skin-care", label: "Skin Care" },
-  { value: "body-care", label: "Body Care" },
+  { value: "", label: "ALL PRODUCTS" },
+  { value: "hair-care", label: "HAIR CARE" },
+  { value: "skin-care", label: "SKIN CARE" },
+  { value: "body-care", label: "BODY CARE" },
 ];
 
 const Shop = () => {
@@ -37,7 +37,9 @@ const Shop = () => {
       }
     })();
 
-    return () => { ignore = true; };
+    return () => {
+      ignore = true;
+    };
   }, [activeCategory]);
 
   const handleAdd = (product) => {
@@ -50,41 +52,50 @@ const Shop = () => {
   };
 
   return (
-    <div>
-      {/* Page header */}
-      <div className="bg-ink text-ivory py-14 sm:py-16 text-center">
-        <span className="eyebrow mb-3">Shop</span>
-        <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl">All Products</h1>
+    <div className="bg-[#fcfbf9] min-h-screen">
+      {/* Page Header */}
+      <div className="bg-ink text-ivory py-16 sm:py-20 text-center relative overflow-hidden -mt-[105px] pt-[150px]">
+        <div className="container-content relative z-10">
+          <span className="eyebrow mb-3 text-gold-3">EXCLUSIVE COLLECTION</span>
+          <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl text-white tracking-tight uppercase">
+            {activeCategory ? activeCategory.replace("-", " ") : "OUR PRODUCTS"}
+          </h1>
+          <p className="mt-4 text-cream/75 max-w-md mx-auto text-sm sm:text-base font-light">
+            100% organic botanicals crafted for natural radiance, strength, and lasting nourishment.
+          </p>
+        </div>
       </div>
 
       <div className="container-content py-12 sm:py-16">
-        {/* Category filter */}
-        <div className="flex flex-wrap justify-center gap-3 mb-12">
-          {CATEGORIES.map((cat) => (
-            <button
-              key={cat.value}
-              onClick={() => handleCategoryChange(cat.value)}
-              className={`px-5 py-2.5 text-[12.5px] tracking-[0.08em] uppercase rounded-full border transition-colors
-                ${activeCategory === cat.value
-                  ? "bg-ink text-ivory border-ink"
-                  : "border-cream-dim text-ink/60 hover:border-ink hover:text-ink"}`}
-            >
-              {cat.label}
-            </button>
-          ))}
+        {/* Category Filter Pills (Dastan Style) */}
+        <div className="flex flex-wrap justify-center gap-3 sm:gap-4 mb-14">
+          {CATEGORIES.map((cat) => {
+            const isActive = activeCategory === cat.value;
+            return (
+              <button
+                key={cat.value}
+                onClick={() => handleCategoryChange(cat.value)}
+                className={`px-6 py-2.5 text-[11.5px] sm:text-[12px] tracking-[0.14em] font-semibold uppercase rounded-full border transition-all duration-300 ${
+                  isActive
+                    ? "bg-ink text-ivory border-ink shadow-md"
+                    : "bg-white border-cream-dim text-ink/70 hover:border-ink hover:text-ink shadow-xs"
+                }`}
+              >
+                {cat.label}
+              </button>
+            );
+          })}
         </div>
 
-        {/* States: loading / error / content */}
+        {/* States: Loading / Error / Content */}
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="border border-cream-dim animate-pulse">
-                <div className="aspect-square bg-cream" />
-                <div className="p-6 space-y-3">
-                  <div className="h-3 w-1/3 bg-cream" />
-                  <div className="h-4 w-2/3 bg-cream" />
-                  <div className="h-9 w-full bg-cream mt-4" />
-                </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="animate-pulse space-y-4">
+                <div className="aspect-square bg-cream/70 rounded-xs" />
+                <div className="h-4 w-3/4 bg-cream/70 rounded-xs" />
+                <div className="h-3 w-1/2 bg-cream/70 rounded-xs" />
+                <div className="h-9 w-full bg-cream/70 rounded-xs" />
               </div>
             ))}
           </div>
@@ -97,10 +108,10 @@ const Shop = () => {
           </div>
         ) : products.length === 0 ? (
           <div className="text-center py-20">
-            <p className="text-ink/60">No products found in this category yet.</p>
+            <p className="text-ink/60 font-light text-lg">No products found in this category yet.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-12">
             {products.map((product) => (
               <ProductCard key={product._id} product={product} onAdd={handleAdd} />
             ))}

@@ -8,7 +8,7 @@ import {
   HiArrowRight,
 } from "react-icons/hi2";
 import { FaFacebookF, FaInstagram, FaTiktok, FaYoutube } from "react-icons/fa";
-import logo from "../assets/logo.jpg";
+import logo from "../assets/nav-up.png";
 import { siteConfig, buildWhatsAppLink } from "../config/siteConfig.js";
 
 const SOCIAL_ICONS = [

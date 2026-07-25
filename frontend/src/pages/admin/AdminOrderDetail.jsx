@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { adminGetOrder, adminUpdateOrderStatus, adminAdjustCharges } from "../../api/admin.js";
-import logo from "../../assets/logo.jpg";
+import logo from "../../assets/nav-up.png";
 
 const STATUS_COLORS = {
   placed: "bg-yellow-100 text-yellow-800",
