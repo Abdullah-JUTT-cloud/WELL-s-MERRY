@@ -53,7 +53,7 @@ const Header = () => {
   }, []);
 
   const navLinkClass = ({ isActive }) =>
-    `relative py-1 text-[12.5px] tracking-[0.18em] uppercase font-semibold transition-colors
+    `relative py-1 text-[12px] lg:text-[12.5px] tracking-[0.16em] lg:tracking-[0.18em] uppercase font-semibold transition-colors
      after:content-[''] after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:bg-gold-2
      after:transition-all after:duration-300
      ${isActive
@@ -63,19 +63,19 @@ const Header = () => {
   return (
     <header className="sticky top-0 z-50 w-full transition-all duration-300">
       {/* Always Moving / Circulating Top Announcement Marquee Bar */}
-      <div className="bg-white text-black text-[11px] font-bold tracking-[0.16em] uppercase py-1.5 overflow-hidden border-b border-white/20 select-none">
+      <div className="bg-white text-black text-[10px] sm:text-[11px] font-bold tracking-[0.14em] sm:tracking-[0.16em] uppercase py-1.5 overflow-hidden border-b border-white/20 select-none whitespace-nowrap">
         <div className="flex w-max animate-marquee">
           {[...Array(6)].map((_, dupIdx) => (
             <div key={dupIdx} className="flex shrink-0 items-center">
-              <Link to="/shop" className="hover:underline flex items-center px-4">
+              <Link to="/shop" className="hover:underline flex items-center px-3 sm:px-4">
                 <span>YOUR SIGNATURE ORGANIC CARE — NOW IN 200ML.</span>
                 <span className="ml-1.5 underline font-black">CLICK HERE</span>
               </Link>
-              <span className="text-gold-1 px-3">▪</span>
-              <span className="px-4">FREE SHIPPING ON ORDERS OVER RS. 3000</span>
-              <span className="text-gold-1 px-3">▪</span>
-              <span className="px-4 font-black">100% ORGANIC &amp; CHEMICAL FREE</span>
-              <span className="text-gold-1 px-3">▪</span>
+              <span className="text-gold-1 px-2.5 sm:px-3">▪</span>
+              <span className="px-3 sm:px-4">FREE SHIPPING ON ORDERS OVER RS. 3000</span>
+              <span className="text-gold-1 px-2.5 sm:px-3">▪</span>
+              <span className="px-3 sm:px-4 font-black">100% ORGANIC &amp; CHEMICAL FREE</span>
+              <span className="text-gold-1 px-2.5 sm:px-3">▪</span>
             </div>
           ))}
         </div>
@@ -85,19 +85,19 @@ const Header = () => {
       <div
         className={`transition-all duration-300 ${
           scrolled
-            ? "bg-ink/90 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.6)] py-2.5 border-b border-gold-2/15"
-            : "bg-gradient-to-b from-black/85 via-black/45 to-transparent py-3 border-b border-white/10"
+            ? "bg-ink/95 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.6)] py-2 sm:py-2.5 border-b border-gold-2/15"
+            : "bg-gradient-to-b from-black/90 via-black/55 to-transparent py-2.5 sm:py-3 border-b border-white/10"
         }`}
       >
-        <div className="container-content flex items-center justify-between gap-4">
+        <div className="container-content flex items-center justify-between gap-2 sm:gap-4 px-3 sm:px-6">
           {/* Mobile Menu Toggle */}
           <div className="flex lg:hidden items-center flex-1">
             <button
               aria-label="Menu"
               onClick={() => setMobileOpen(true)}
-              className="text-cream hover:text-gold-3 transition-colors p-1"
+              className="text-cream hover:text-gold-3 transition-colors p-1.5 -ml-1"
             >
-              <HiBars3 className="w-6 h-6" />
+              <HiBars3 className="w-6 h-6 sm:w-7 sm:h-7" />
             </button>
           </div>
 
@@ -116,13 +116,13 @@ const Header = () => {
               <img
                 src={logo}
                 alt="Well's Merry"
-                className="h-12 sm:h-14 lg:h-16 w-auto object-contain filter drop-shadow-[0_4px_12px_rgba(0,0,0,0.6)] transition-transform duration-300 hover:scale-105"
+                className="h-9 sm:h-12 lg:h-15 w-auto object-contain filter drop-shadow-[0_4px_12px_rgba(0,0,0,0.6)] transition-transform duration-300 hover:scale-105"
               />
             </Link>
           </div>
 
           {/* Action Icons */}
-          <div className="flex items-center justify-end gap-5 flex-1 text-cream">
+          <div className="flex items-center justify-end gap-3 sm:gap-5 flex-1 text-cream">
             <button
               aria-label="Search"
               className="hidden sm:flex text-cream/90 hover:text-gold-3 transition-colors p-1"
@@ -135,25 +135,25 @@ const Header = () => {
               <button
                 aria-label="Account"
                 onClick={() => setAccountOpen((v) => !v)}
-                className="flex items-center text-cream/90 hover:text-gold-3 transition-colors p-1"
+                className="flex items-center text-cream/90 hover:text-gold-3 transition-colors p-1.5"
               >
-                <HiOutlineUser className="w-5 h-5" />
+                <HiOutlineUser className="w-5 h-5 sm:w-6 sm:h-6" />
               </button>
 
               {accountOpen && (
-                <div className="absolute right-0 mt-4 w-52 bg-ivory border border-cream-dim rounded-sm shadow-soft py-2 animate-[fadeIn_0.15s_ease-out]">
+                <div className="absolute right-0 mt-3 w-52 bg-ivory border border-cream-dim rounded-lg shadow-soft py-2 animate-[fadeIn_0.15s_ease-out] z-50">
                   {authLoading ? (
                     <div className="px-4 py-3 text-sm text-ink/50">Loading…</div>
                   ) : isAuthenticated ? (
                     <>
                       <div className="px-4 py-2 border-b border-cream-dim">
-                        <p className="text-sm font-medium text-ink truncate">{user.name}</p>
+                        <p className="text-sm font-semibold text-ink truncate">{user.name}</p>
                         <p className="text-xs text-ink/50 truncate">{user.email}</p>
                       </div>
                       <Link
                         to="/account/orders"
                         onClick={() => setAccountOpen(false)}
-                        className="block px-4 py-2.5 text-sm text-ink/80 hover:bg-cream hover:text-ink"
+                        className="block px-4 py-2.5 text-sm text-ink/80 hover:bg-cream hover:text-ink font-medium"
                       >
                         My Orders
                       </Link>
@@ -162,7 +162,7 @@ const Header = () => {
                           logout();
                           setAccountOpen(false);
                         }}
-                        className="w-full text-left px-4 py-2.5 text-sm text-ink/80 hover:bg-cream hover:text-ink"
+                        className="w-full text-left px-4 py-2.5 text-sm text-ink/80 hover:bg-cream hover:text-ink font-medium"
                       >
                         Log Out
                       </button>
@@ -172,14 +172,14 @@ const Header = () => {
                       <Link
                         to="/login"
                         onClick={() => setAccountOpen(false)}
-                        className="block px-4 py-2.5 text-sm text-ink/80 hover:bg-cream hover:text-ink"
+                        className="block px-4 py-2.5 text-sm text-ink/80 hover:bg-cream hover:text-ink font-medium"
                       >
                         Log In
                       </Link>
                       <Link
                         to="/register"
                         onClick={() => setAccountOpen(false)}
-                        className="block px-4 py-2.5 text-sm text-ink/80 hover:bg-cream hover:text-ink"
+                        className="block px-4 py-2.5 text-sm text-ink/80 hover:bg-cream hover:text-ink font-medium"
                       >
                         Create Account
                       </Link>
@@ -193,11 +193,11 @@ const Header = () => {
             <Link
               to="/cart"
               aria-label="Cart"
-              className="relative flex items-center text-cream/90 hover:text-gold-3 transition-colors p-1"
+              className="relative flex items-center text-cream/90 hover:text-gold-3 transition-colors p-1.5"
             >
-              <HiOutlineShoppingBag className="w-5 h-5" />
+              <HiOutlineShoppingBag className="w-5 h-5 sm:w-6 sm:h-6" />
               {itemCount > 0 && (
-                <span className="absolute -top-1.5 -right-2 w-4 h-4 rounded-full bg-gold-2 text-ink text-[10px] font-bold flex items-center justify-center">
+                <span className="absolute -top-1 -right-1.5 w-4 h-4 rounded-full bg-gold-2 text-ink text-[10px] font-bold flex items-center justify-center shadow-xs">
                   {itemCount > 9 ? "9+" : itemCount}
                 </span>
               )}
@@ -213,24 +213,24 @@ const Header = () => {
         }`}
       >
         <div
-          className={`absolute inset-0 bg-black/60 backdrop-blur-xs transition-opacity duration-300 ${
+          className={`absolute inset-0 bg-black/75 backdrop-blur-xs transition-opacity duration-300 ${
             mobileOpen ? "opacity-100" : "opacity-0"
           }`}
           onClick={() => setMobileOpen(false)}
         />
         <div
-          className={`absolute right-0 top-0 h-full w-[82%] max-w-sm bg-ink border-l border-gold-2/15
-                      transition-transform duration-300 ease-out flex flex-col
-                      ${mobileOpen ? "translate-x-0" : "translate-x-full"}`}
+          className={`absolute left-0 top-0 h-full w-[85%] max-w-xs bg-ink border-r border-gold-2/20
+                      transition-transform duration-300 ease-out flex flex-col z-10
+                      ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}
         >
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gold-2/15">
-            <img src={logo} alt="Well's Merry" className="h-10 w-auto object-contain" />
-            <button aria-label="Close menu" onClick={() => setMobileOpen(false)} className="text-cream">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-gold-2/15 bg-black/40">
+            <img src={logo} alt="Well's Merry" className="h-9 w-auto object-contain" />
+            <button aria-label="Close menu" onClick={() => setMobileOpen(false)} className="text-cream p-1">
               <HiXMark className="w-6 h-6" />
             </button>
           </div>
 
-          <nav className="flex flex-col px-6 py-4">
+          <nav className="flex flex-col px-5 py-3">
             {NAV_LINKS.map((link) => (
               <NavLink
                 key={link.to}
@@ -238,8 +238,8 @@ const Header = () => {
                 end={link.to === "/"}
                 onClick={() => setMobileOpen(false)}
                 className={({ isActive }) =>
-                  `py-4 border-b border-gold-2/10 text-[14px] tracking-[0.14em] uppercase font-medium ${
-                    isActive ? "text-gold-3 font-semibold" : "text-cream/90"
+                  `py-3.5 border-b border-gold-2/10 text-[13.5px] tracking-[0.14em] uppercase font-semibold ${
+                    isActive ? "text-gold-3" : "text-cream/90 hover:text-gold-3"
                   }`
                 }
               >
@@ -248,20 +248,24 @@ const Header = () => {
             ))}
           </nav>
 
-          <div className="mt-auto px-6 py-6 border-t border-gold-2/15">
+          <div className="mt-auto px-5 py-6 border-t border-gold-2/15 bg-black/40">
             {isAuthenticated ? (
               <button
                 onClick={() => {
                   logout();
                   setMobileOpen(false);
                 }}
-                className="btn btn-outline-light w-full"
+                className="w-full border border-gold-2/40 text-gold-3 font-semibold uppercase text-xs tracking-wider py-3 rounded-lg hover:bg-gold-2 hover:text-ink transition"
               >
                 Log Out
               </button>
             ) : (
-              <Link to="/login" onClick={() => setMobileOpen(false)} className="btn btn-gold w-full">
-                Log In / Sign Up
+              <Link
+                to="/login"
+                onClick={() => setMobileOpen(false)}
+                className="block w-full bg-gold-2 text-ink font-bold uppercase text-xs tracking-wider py-3 rounded-lg text-center shadow-md hover:bg-gold-3 transition"
+              >
+                Log In / Register
               </Link>
             )}
           </div>

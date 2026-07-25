@@ -108,6 +108,27 @@ function OrderPDF({ order }) {
         </div>
       </div>
 
+      {/* Online Payment Details */}
+      {order.paymentMethod === "online" && order.onlinePayment && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+          <h2 className="font-bold text-xs uppercase tracking-wide text-blue-600 mb-2">Online Payment Details</h2>
+          <div className="grid grid-cols-2 gap-2 text-sm">
+            <p><span className="text-gray-500">Provider:</span> <span className="font-medium capitalize">{order.onlinePayment.provider}</span></p>
+            <p><span className="text-gray-500">Sender Account:</span> <span className="font-medium font-mono">{order.onlinePayment.senderAccount}</span></p>
+            <p><span className="text-gray-500">Amount Sent:</span> <span className="font-medium">Rs {order.onlinePayment.transactionAmount?.toLocaleString()}</span></p>
+            <p><span className="text-gray-500">Payment Status:</span> <span className="font-medium capitalize">{order.paymentStatus}</span></p>
+          </div>
+          {order.onlinePayment.receiptImage && (
+            <div className="mt-3">
+              <p className="text-xs text-gray-500 mb-1">Receipt Screenshot:</p>
+              <a href={order.onlinePayment.receiptImage} target="_blank" rel="noopener noreferrer">
+                <img src={order.onlinePayment.receiptImage} alt="Payment receipt" className="max-w-xs max-h-48 rounded border border-gray-200 hover:opacity-90 transition-opacity" />
+              </a>
+            </div>
+          )}
+        </div>
+      )}
+
       {order.notes && (
         <div className="bg-yellow-50 border border-yellow-200 rounded p-3 mb-4 text-xs">
           <span className="font-semibold">Notes: </span>{order.notes}

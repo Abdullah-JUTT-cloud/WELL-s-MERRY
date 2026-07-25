@@ -5,50 +5,63 @@ const ProductCard = ({ product, onAdd }) => {
   const outOfStock = !product.isFallback && product.stock === 0;
   const href = `/products/${product.slug}`;
 
-  // Clean title formatting
-  const formattedTitle = product.name.toLowerCase().includes("well")
-    ? product.name.toUpperCase()
-    : `WELL'S MERRY - ${product.name.toUpperCase()}`;
+  // Sanitize title display for test/seed items
+  const displayName =
+    product.name?.toLowerCase().includes("abdullah") || product.name?.toLowerCase().includes("test")
+      ? "HAIR CARE OIL 200ML"
+      : product.name.toUpperCase();
+
+  const formattedTitle = displayName.startsWith("WELL")
+    ? displayName
+    : `WELL'S MERRY - ${displayName}`;
+
+  // Sanitize size display
+  const displaySize =
+    !product.size || product.size === "8" ? "200ML" : product.size.toUpperCase();
 
   return (
     <div className="group flex flex-col transition-all duration-300">
-      {/* Product Image Container (Using object-contain with light padding to prevent image cropping) */}
+      {/* Product Image Container (Aspect 4/5 portrait ratio with edge-to-edge cover to eliminate blank borders) */}
       <Link
         to={href}
-        className="aspect-square overflow-hidden bg-[#f8f7f5] block relative mb-4 rounded-xs border border-cream-dim/60 shadow-xs flex items-center justify-center p-2 sm:p-3"
+        className="aspect-[4/5] overflow-hidden bg-[#f0eee8] block relative mb-4 rounded-2xl border border-black/5 shadow-xs"
       >
         <img
           src={product.images?.[0] || product.image}
           alt={product.name}
-          className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500 ease-out"
+          className="w-full h-full object-cover object-center group-hover:scale-108 transition-transform duration-700 ease-out"
         />
+        
+        {/* Soft subtle bottom gradient overlay for luxury feel */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
         {outOfStock && (
-          <span className="absolute top-3 left-3 bg-ink text-gold-3 text-[10px] tracking-[0.12em] uppercase px-3 py-1 font-semibold rounded-xs shadow-md">
+          <span className="absolute top-3 left-3 bg-ink text-gold-3 text-[10px] tracking-[0.12em] uppercase px-3 py-1 font-semibold rounded-full shadow-md z-10">
             Out of Stock
           </span>
         )}
       </Link>
 
-      {/* Product Details matching Dastan reference layout */}
+      {/* Product Details matching luxury reference layout */}
       <div className="flex flex-col flex-1 px-1">
         {/* Title */}
         <Link to={href}>
-          <h3 className="font-body text-[13.5px] sm:text-[14px] font-semibold text-ink uppercase tracking-[0.06em] leading-snug hover:text-gold-1 transition-colors mb-1.5 line-clamp-1">
+          <h3 className="font-body text-[13px] sm:text-[13.5px] font-bold text-ink uppercase tracking-[0.06em] leading-snug hover:text-gold-1 transition-colors mb-1 line-clamp-1">
             {formattedTitle}
           </h3>
         </Link>
 
         {/* Sale Price */}
-        <p className="text-[13.5px] text-ink/80 font-medium mb-4">
-          <span className="text-ink/60">Sale price</span>{" "}
-          <span className="font-semibold text-ink">Rs. {product.price?.toLocaleString()}</span>
+        <p className="text-[13px] text-ink/80 font-medium mb-4">
+          <span className="text-ink/50">Sale price</span>{" "}
+          <span className="font-bold text-ink">Rs. {product.price?.toLocaleString()}</span>
         </p>
 
         {/* Bottom Row: Size Badge + Quick Add Shopping Bag Icon */}
         <div className="flex items-center justify-between mt-auto pt-1">
           {/* Size Box */}
-          <div className="border border-cream-dim bg-white px-3.5 py-1.5 text-[11px] font-semibold tracking-[0.1em] uppercase text-ink/75 rounded-xs">
-            {product.size || "200ML"}
+          <div className="border border-black/15 bg-white px-3.5 py-1.5 text-[11px] font-bold tracking-[0.1em] uppercase text-ink/80 rounded-lg shadow-2xs">
+            {displaySize}
           </div>
 
           {/* Quick Add Shopping Bag Icon Button */}
@@ -56,10 +69,10 @@ const ProductCard = ({ product, onAdd }) => {
             onClick={() => onAdd(product)}
             disabled={outOfStock}
             aria-label={`Add ${product.name} to cart`}
-            className={`w-9 h-9 border rounded-xs flex items-center justify-center transition-all duration-300 ${
+            className={`w-9 h-9 border rounded-lg flex items-center justify-center transition-all duration-300 ${
               outOfStock
-                ? "border-cream-dim text-ink/30 cursor-not-allowed"
-                : "border-cream-dim text-ink hover:bg-ink hover:text-ivory hover:border-ink shadow-xs"
+                ? "border-black/10 text-ink/30 cursor-not-allowed"
+                : "border-black/20 text-ink hover:bg-black hover:text-white hover:border-black shadow-2xs"
             }`}
           >
             <HiOutlineShoppingBag className="w-4 h-4" />

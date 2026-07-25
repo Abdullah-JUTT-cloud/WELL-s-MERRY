@@ -53,29 +53,29 @@ const Shop = () => {
 
   return (
     <div className="bg-[#fcfbf9] min-h-screen">
-      {/* Page Header */}
-      <div className="bg-ink text-ivory py-16 sm:py-20 text-center relative overflow-hidden -mt-[105px] pt-[150px]">
+      {/* Page Header (Responsive alignment fix for top transparent navbar) */}
+      <div className="bg-ink text-ivory py-12 sm:py-20 text-center relative overflow-hidden -mt-[90px] sm:-mt-[105px] pt-[130px] sm:pt-[150px] px-4 sm:px-6">
         <div className="container-content relative z-10">
-          <span className="eyebrow mb-3 text-gold-3">EXCLUSIVE COLLECTION</span>
-          <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl text-white tracking-tight uppercase">
+          <span className="eyebrow mb-2 sm:mb-3 text-gold-3">EXCLUSIVE COLLECTION</span>
+          <h1 className="font-display text-3xl sm:text-5xl lg:text-6xl text-white tracking-tight uppercase">
             {activeCategory ? activeCategory.replace("-", " ") : "OUR PRODUCTS"}
           </h1>
-          <p className="mt-4 text-cream/75 max-w-md mx-auto text-sm sm:text-base font-light">
+          <p className="mt-3 text-cream/75 max-w-md mx-auto text-xs sm:text-base font-light">
             100% organic botanicals crafted for natural radiance, strength, and lasting nourishment.
           </p>
         </div>
       </div>
 
-      <div className="container-content py-12 sm:py-16">
-        {/* Category Filter Pills (Dastan Style) */}
-        <div className="flex flex-wrap justify-center gap-3 sm:gap-4 mb-14">
+      <div className="container-content py-8 sm:py-16 px-3 sm:px-6">
+        {/* Category Filter Pills (Horizontal scrollable on mobile) */}
+        <div className="flex overflow-x-auto sm:flex-wrap sm:justify-center gap-2 sm:gap-4 mb-8 sm:mb-14 pb-2 no-scrollbar">
           {CATEGORIES.map((cat) => {
             const isActive = activeCategory === cat.value;
             return (
               <button
                 key={cat.value}
                 onClick={() => handleCategoryChange(cat.value)}
-                className={`px-6 py-2.5 text-[11.5px] sm:text-[12px] tracking-[0.14em] font-semibold uppercase rounded-full border transition-all duration-300 ${
+                className={`shrink-0 px-5 sm:px-6 py-2 sm:py-2.5 text-[11px] sm:text-[12px] tracking-[0.14em] font-semibold uppercase rounded-full border transition-all duration-300 ${
                   isActive
                     ? "bg-ink text-ivory border-ink shadow-md"
                     : "bg-white border-cream-dim text-ink/70 hover:border-ink hover:text-ink shadow-xs"
@@ -89,29 +89,28 @@ const Shop = () => {
 
         {/* States: Loading / Error / Content */}
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-8">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="animate-pulse space-y-4">
-                <div className="aspect-square bg-cream/70 rounded-xs" />
-                <div className="h-4 w-3/4 bg-cream/70 rounded-xs" />
+              <div key={i} className="animate-pulse space-y-3">
+                <div className="aspect-[4/5] bg-cream/70 rounded-2xl" />
+                <div className="h-3.5 w-3/4 bg-cream/70 rounded-xs" />
                 <div className="h-3 w-1/2 bg-cream/70 rounded-xs" />
-                <div className="h-9 w-full bg-cream/70 rounded-xs" />
               </div>
             ))}
           </div>
         ) : error ? (
-          <div className="text-center py-20">
+          <div className="text-center py-16">
             <p className="text-ink/60 mb-4">We couldn't load products right now.</p>
             <button onClick={() => window.location.reload()} className="btn btn-outline">
               Try Again
             </button>
           </div>
         ) : products.length === 0 ? (
-          <div className="text-center py-20">
-            <p className="text-ink/60 font-light text-lg">No products found in this category yet.</p>
+          <div className="text-center py-16">
+            <p className="text-ink/60 font-light text-base sm:text-lg">No products found in this category yet.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-12">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-3 sm:gap-x-7 gap-y-8 sm:gap-y-12">
             {products.map((product) => (
               <ProductCard key={product._id} product={product} onAdd={handleAdd} />
             ))}
