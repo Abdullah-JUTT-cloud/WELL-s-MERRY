@@ -1,12 +1,7 @@
 import heroBottle from "../assets/oil-lying-pump.jpg";
 import boxStanding from "../assets/oil-box-bottle-standing.jpg";
 import flatlay from "../assets/oil-flatlay-diagonal.jpg";
-import bottleSolo from "../assets/oil-bottle-solo.jpg";
 
-// Used only when the backend hasn't been seeded with real product data yet
-// (or the API call fails). Mirrors the exact shape a real Product document
-// from the backend would have, so ProductDetail.jsx never needs a special
-// "fallback mode" branch — it just renders this like any other product.
 export const FALLBACK_PRODUCT = {
   _id: "fallback-hair-oil",
   slug: "hair-care-oil",
@@ -48,7 +43,7 @@ export const FALLBACK_PRODUCT = {
   compareAtPrice: null,
   size: "200ml",
   stock: 25,
-  images: [heroBottle, boxStanding, bottleSolo, flatlay],
+  images: [heroBottle, boxStanding, flatlay],
   rating: 4.6,
   numReviews: 23,
   isFallback: true,

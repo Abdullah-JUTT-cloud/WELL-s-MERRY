@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import Header from "./components/Header.jsx";
 import Footer from "./components/Footer.jsx";
 import WhatsAppFloat from "./components/WhatsAppFloat.jsx";
-
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
 // Real pages, added incrementally as each one is built.
 // Using React.lazy means each page is its own JS chunk — the browser
@@ -15,6 +15,17 @@ import WhatsAppFloat from "./components/WhatsAppFloat.jsx";
 const Home = lazy(() => import("./pages/Home.jsx"));
 const Shop = lazy(() => import("./pages/Shop.jsx"));
 const ProductDetail = lazy(() => import("./pages/ProductDetail.jsx"));
+const Cart = lazy(() => import("./pages/Cart.jsx"));
+const Checkout = lazy(() => import("./pages/Checkout.jsx"));
+const OrderConfirmation = lazy(() => import("./pages/OrderConfirmation.jsx"));
+const Login = lazy(() => import("./pages/Login.jsx"));
+const Register = lazy(() => import("./pages/Register.jsx"));
+const VerifyOtp = lazy(() => import("./pages/VerifyOtp.jsx"));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword.jsx"));
+const Contact = lazy(() => import("./pages/Contact.jsx"));
+const Outlets = lazy(() => import("./pages/Outlets.jsx"));
+const About = lazy(() => import("./pages/About.jsx"));
+const Orders = lazy(() => import("./pages/Orders.jsx"));
 
 // Temporary stand-in for pages not yet built. Once a real page exists,
 // its <Route> below gets updated to import the real component instead —
@@ -68,16 +79,22 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/shop" element={<Shop />} />
           <Route path="/products/:slug" element={<ProductDetail />} />
-          <Route path="/cart" element={<ComingSoon label="Cart" />} />
-          <Route path="/checkout" element={<ComingSoon label="Checkout" />} />
-          <Route path="/about" element={<ComingSoon label="About Us" />} />
-          <Route path="/contact" element={<ComingSoon label="Contact" />} />
-          <Route path="/outlets" element={<ComingSoon label="Our Outlets" />} />
-          <Route path="/login" element={<ComingSoon label="Log In" />} />
-          <Route path="/register" element={<ComingSoon label="Create Account" />} />
-          <Route path="/verify-otp" element={<ComingSoon label="Verify Email" />} />
-          <Route path="/forgot-password" element={<ComingSoon label="Forgot Password" />} />
-          <Route path="/account/orders" element={<ComingSoon label="My Orders" />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route
+            path="/order-confirmation/:id"
+            element={<OrderConfirmation />}
+          />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/outlets" element={<Outlets />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/verify-otp" element={<VerifyOtp />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route element={<ProtectedRoute />}>
+            <Route path="/account/orders" element={<Orders />} />
+          </Route>
           <Route path="*" element={<ComingSoon label="Page Not Found" />} />
         </Route>
       </Routes>

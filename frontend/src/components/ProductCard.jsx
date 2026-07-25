@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 const ProductCard = ({ product, onAdd }) => {
   const outOfStock = !product.isFallback && product.stock === 0;
-  const href = product.isFallback ? "/shop" : `/products/${product.slug}`;
+  const href = `/products/${product.slug}`;
 
   return (
     <div className="group border border-cream-dim bg-white flex flex-col hover:shadow-soft hover:-translate-y-1 transition-all duration-300">
