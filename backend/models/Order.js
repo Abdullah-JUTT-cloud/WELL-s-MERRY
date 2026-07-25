@@ -45,6 +45,14 @@ const orderSchema = new mongoose.Schema(
     paymentMethod: { type: String, enum: ["cod", "whatsapp", "online"], required: true },
     paymentStatus: { type: String, enum: ["pending", "paid", "failed"], default: "pending" },
 
+    // Online payment details (only when paymentMethod === "online")
+    onlinePayment: {
+      provider: { type: String, enum: ["easypaisa", "jazzcash", "nayapay", "raqami"], default: undefined },
+      senderAccount: { type: String, trim: true },
+      transactionAmount: { type: Number },
+      receiptImage: { type: String }, // Cloudinary URL
+    },
+
     itemsPrice: { type: Number, required: true },
     shippingPrice: { type: Number, required: true, default: 0 },
 

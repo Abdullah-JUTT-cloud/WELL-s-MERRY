@@ -6,7 +6,13 @@ import Product from "../models/Product.js";
 // @route   POST /api/orders
 // @access  Public (optionalAuth — req.user set if logged in, undefined if guest)
 export const createOrder = asyncHandler(async (req, res) => {
-  const { orderItems, shippingAddress, paymentMethod, guestEmail, notes } = req.body;
+  // When paymentMethod is "online", the request is multipart/form-data
+  // so fields come as flat strings that need parsing.
+  let { orderItems, shippingAddress, paymentMethod, guestEmail, notes } = req.body;
+
+  // Parse JSON strings from FormData if needed
+  if (typeof orderItems === "string") orderItems = JSON.parse(orderItems);
+  if (typeof shippingAddress === "string") shippingAddress = JSON.parse(shippingAddress);
 
   if (!orderItems || orderItems.length === 0) {
     res.status(400);
@@ -23,9 +29,36 @@ export const createOrder = asyncHandler(async (req, res) => {
     throw new Error("Invalid payment method");
   }
 
+  // Validate online payment fields
+  let onlinePaymentData = undefined;
   if (paymentMethod === "online") {
-    res.status(400);
-    throw new Error("Online payment is coming soon. Please choose Cash on Delivery or WhatsApp order for now.");
+    const provider = req.body.onlineProvider;
+    const senderAccount = req.body.onlineSenderAccount;
+    const transactionAmount = Number(req.body.onlineTransactionAmount);
+
+    if (!["easypaisa", "jazzcash", "nayapay", "raqami"].includes(provider)) {
+      res.status(400);
+      throw new Error("Please select a valid payment provider");
+    }
+    if (!senderAccount || senderAccount.trim().length < 7) {
+      res.status(400);
+      throw new Error("Please enter the account number you sent payment from");
+    }
+    if (!transactionAmount || transactionAmount <= 0) {
+      res.status(400);
+      throw new Error("Please enter the transaction amount");
+    }
+    if (!req.file) {
+      res.status(400);
+      throw new Error("Please upload a receipt screenshot");
+    }
+
+    onlinePaymentData = {
+      provider,
+      senderAccount: senderAccount.trim(),
+      transactionAmount,
+      receiptImage: req.file.path,
+    };
   }
 
   // Re-fetch each product from the DB to trust real prices/stock —
@@ -79,6 +112,7 @@ export const createOrder = asyncHandler(async (req, res) => {
     orderItems: verifiedItems,
     shippingAddress,
     paymentMethod,
+    onlinePayment: onlinePaymentData,
     itemsPrice,
     shippingPrice,
     totalPrice,

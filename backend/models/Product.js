@@ -6,6 +6,7 @@ const reviewSchema = new mongoose.Schema(
     name: { type: String, required: true }, // snapshot of reviewer name at time of review
     rating: { type: Number, required: true, min: 1, max: 5 },
     comment: { type: String, trim: true },
+    images: [{ type: String }], // cloudinary URLs of photos attached to the review
   },
   { timestamps: true }
 );

@@ -1,5 +1,6 @@
 import asyncHandler from "express-async-handler";
 import Product from "../models/Product.js";
+import Order from "../models/Order.js";
 
 // @desc    Get all active products (supports ?category= and ?featured=true)
 // @route   GET /api/products
@@ -131,9 +132,9 @@ export const deleteProduct = asyncHandler(async (req, res) => {
   res.json({ message: "Product removed" });
 });
 
-// @desc    Add a review to a product
+// @desc    Add a review to a product (only customers with a delivered order containing this product)
 // @route   POST /api/products/:id/reviews
-// @access  Private (logged-in customers only — no guest reviews)
+// @access  Private (logged-in customers who have received this product)
 export const addProductReview = asyncHandler(async (req, res) => {
   const { rating, comment } = req.body;
 
@@ -148,6 +149,19 @@ export const addProductReview = asyncHandler(async (req, res) => {
     throw new Error("Product not found");
   }
 
+  // Only allow review if the user has at least one delivered order containing this product
+  const deliveredOrder = await Order.findOne({
+    user: req.user._id,
+    orderStatus: "delivered",
+    "orderItems.product": product._id,
+  });
+
+  if (!deliveredOrder) {
+    res.status(403);
+    throw new Error("You can only review products from your delivered orders");
+  }
+
+  // Check if already reviewed
   const alreadyReviewed = product.reviews.find(
     (r) => r.user.toString() === req.user._id.toString()
   );
@@ -156,15 +170,52 @@ export const addProductReview = asyncHandler(async (req, res) => {
     throw new Error("You have already reviewed this product");
   }
 
+  // Collect uploaded image URLs (multer-cloudinary puts them in req.files)
+  const images = req.files ? req.files.map((f) => f.path) : [];
+
   product.reviews.push({
     user: req.user._id,
     name: req.user.name,
     rating: Number(rating),
     comment,
+    images,
   });
 
   product.recalculateRating();
   await product.save();
 
   res.status(201).json({ message: "Review added" });
+});
+
+// @desc    Check if the logged-in user can review a specific product
+// @route   GET /api/products/:id/can-review
+// @access  Private
+export const canReviewProduct = asyncHandler(async (req, res) => {
+  const product = await Product.findById(req.params.id);
+  if (!product) {
+    res.status(404);
+    throw new Error("Product not found");
+  }
+
+  // Check if user already reviewed
+  const alreadyReviewed = product.reviews.some(
+    (r) => r.user.toString() === req.user._id.toString()
+  );
+
+  if (alreadyReviewed) {
+    return res.json({ canReview: false, reason: "already_reviewed" });
+  }
+
+  // Check for a delivered order containing this product
+  const deliveredOrder = await Order.findOne({
+    user: req.user._id,
+    orderStatus: "delivered",
+    "orderItems.product": product._id,
+  });
+
+  if (!deliveredOrder) {
+    return res.json({ canReview: false, reason: "no_delivered_order" });
+  }
+
+  res.json({ canReview: true });
 });

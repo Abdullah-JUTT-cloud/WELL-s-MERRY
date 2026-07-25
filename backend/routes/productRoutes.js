@@ -6,8 +6,10 @@ import {
   updateProduct,
   deleteProduct,
   addProductReview,
+  canReviewProduct,
 } from "../controllers/productController.js";
 import { protect, adminOnly } from "../middleware/authMiddleware.js";
+import { uploadReviewImages } from "../utils/cloudinary.js";
 
 const router = express.Router();
 
@@ -16,7 +18,8 @@ router.get("/", getProducts);
 router.get("/:slug", getProductBySlug);
 
 // Private — logged-in customers only
-router.post("/:id/reviews", protect, addProductReview);
+router.get("/:id/can-review", protect, canReviewProduct);
+router.post("/:id/reviews", protect, uploadReviewImages.array("images", 5), addProductReview);
 
 // Private/Admin — product management
 router.post("/", protect, adminOnly, createProduct);

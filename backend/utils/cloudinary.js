@@ -8,6 +8,7 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+// Product images (admin uploads)
 const storage = new CloudinaryStorage({
   cloudinary,
   params: {
@@ -18,4 +19,35 @@ const storage = new CloudinaryStorage({
 });
 
 export const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
+
+// Review images (customer uploads) — smaller size, separate folder
+const reviewStorage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: "wellsmerry/reviews",
+    allowed_formats: ["jpg", "jpeg", "png", "webp"],
+    transformation: [{ width: 800, height: 800, crop: "limit", quality: "auto" }],
+  },
+});
+
+export const uploadReviewImages = multer({
+  storage: reviewStorage,
+  limits: { fileSize: 3 * 1024 * 1024 }, // 3MB per file
+});
+
+// Payment receipt uploads (customer uploads proof of online payment)
+const receiptStorage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: "wellsmerry/receipts",
+    allowed_formats: ["jpg", "jpeg", "png", "webp"],
+    transformation: [{ width: 1000, height: 1400, crop: "limit", quality: "auto" }],
+  },
+});
+
+export const uploadReceipt = multer({
+  storage: receiptStorage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+});
+
 export default cloudinary;
