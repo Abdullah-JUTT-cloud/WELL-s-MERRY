@@ -18,6 +18,8 @@ const Register = lazy(() => import("./pages/Register.jsx"));
 const VerifyOtp = lazy(() => import("./pages/VerifyOtp.jsx"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword.jsx"));
 const Contact = lazy(() => import("./pages/Contact.jsx"));
+const Blog = lazy(() => import("./pages/Blog.jsx"));
+const BlogPost = lazy(() => import("./pages/BlogPost.jsx"));
 const Outlets = lazy(() => import("./pages/Outlets.jsx"));
 const About = lazy(() => import("./pages/About.jsx"));
 const Orders = lazy(() => import("./pages/Orders.jsx"));
@@ -84,6 +86,8 @@ function App() {
           <Route path="/order-confirmation/:id" element={<OrderConfirmation />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="/outlets" element={<Outlets />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
