@@ -11,6 +11,13 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+
+    /* Live height of the sticky site header, measured and kept up to date by
+       Header.jsx. The value here is only a first-paint fallback (and covers
+       browsers without ResizeObserver) — it's roughly the desktop height.
+       Anything that needs to sit under or clear the header should read this
+       variable instead of hardcoding a pixel value. */
+    --wm-header-h: 105px;
   }
 
   h1, h2, h3, h4 {
@@ -96,6 +103,31 @@
 
   .container-content {
     @apply max-w-content mx-auto px-6 md:px-8;
+  }
+
+  /* --- Header offset helpers ---------------------------------------------
+     The site header is sticky and, on hero pages, transparent — so those
+     pages need to start *underneath* it. These two utilities replace the
+     per-page `-mt-[90px] sm:-mt-[105px]` / `pt-[90px] sm:pt-[110px]` pairs
+     that were duplicated across Home, Shop and ProductDetail. Those numbers
+     were guesses that didn't match the header's real height at every
+     breakpoint, which is what made the navbar look different page to page.
+
+     `.under-header` pulls a full-bleed hero up behind the bar.
+     `.pt-header`    pads content back down so it clears the bar. */
+  .under-header {
+    margin-top: calc(var(--wm-header-h) * -1);
+  }
+  .pt-header {
+    padding-top: var(--wm-header-h);
+  }
+
+  /* Standard dark page banner used by every non-hero page (About, Blog,
+     Contact, Outlets, Orders, Cart…). Centralised so the spacing under the
+     navbar is identical everywhere instead of each page picking its own
+     py-12/py-14/py-16 value. */
+  .page-banner {
+    @apply bg-ink text-ivory text-center py-14 sm:py-20;
   }
 
   /* Scroll-reveal utility: elements start hidden/offset, and a small

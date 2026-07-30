@@ -103,8 +103,12 @@ const Home = () => {
 
   return (
     <div>
-      {/* ============ HERO SLIDER (FULL VIEWPORT COVERAGE) ============ */}
-      <section className="relative w-full h-screen min-h-[680px] bg-ink overflow-hidden select-none -mt-[90px] sm:-mt-[105px] flex flex-col justify-between">
+      {/* ============ HERO SLIDER (FULL VIEWPORT COVERAGE) ============
+          `under-header` pulls the hero up behind the transparent navbar and
+          `pt-header` pushes the copy back below it. Both read the header's
+          measured height (see index.css / Header.jsx) instead of the
+          hardcoded pixel values this used to carry. */}
+      <section className="relative w-full h-screen min-h-[680px] bg-ink overflow-hidden select-none under-header flex flex-col justify-between">
         {/* Slides Container */}
         <div className="absolute inset-0 w-full h-full">
           {HERO_SLIDES.map((slide, index) => (
@@ -126,7 +130,7 @@ const Home = () => {
               <div className="absolute inset-0 w-full h-full bg-gradient-to-t from-black/80 via-transparent to-black/40 sm:from-black/70" />
 
               {/* Slide Content Overlay */}
-              <div className="container-content h-full relative z-20 flex flex-col justify-center pt-[90px] sm:pt-[110px] pb-16 px-4 sm:px-6">
+              <div className="container-content h-full relative z-20 flex flex-col justify-center pt-header pb-16 px-4 sm:px-6">
                 <div
                   className={`max-w-[78%] sm:max-w-xl transition-all duration-700 ${
                     currentSlide === index ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"

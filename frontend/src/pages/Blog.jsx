@@ -8,13 +8,13 @@ import {
 } from "../data/blogPosts.js";
 
 const PostCard = ({ post }) => (
-  <article className="group flex flex-col bg-white border border-cream-dim hover:border-gold-2/50 transition-colors duration-300">
+  <article className="group flex flex-col bg-white border border-cream-dim hover:border-gold-2/50 transition-colors duration-300 rounded-sm overflow-hidden">
     <Link to={`/blog/${post.slug}`} className="block overflow-hidden aspect-[4/3] bg-cream">
       <img
         src={post.image}
         alt={post.title}
         loading="lazy"
-        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+        className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
       />
     </Link>
 
@@ -92,17 +92,22 @@ const Blog = () => {
       </div>
 
       <div className="container-content py-14 sm:py-20">
-        {/* Lead article */}
+        {/* Lead article.
+            The image column used `md:aspect-auto md:h-full`, and `h-full`
+            resolves against a grid row that has no height of its own — so on
+            desktop the image box could collapse and the photo effectively
+            disappeared. A min-height gives `object-cover` a real box to fill
+            at every width. */}
         {showLead && lead && (
           <Link
             to={`/blog/${lead.slug}`}
-            className="group grid md:grid-cols-2 gap-0 mb-14 border border-cream-dim bg-white hover:border-gold-2/50 transition-colors duration-300"
+            className="group grid md:grid-cols-2 gap-0 mb-14 border border-cream-dim bg-white hover:border-gold-2/50 transition-colors duration-300 rounded-sm overflow-hidden"
           >
-            <div className="overflow-hidden aspect-[16/11] md:aspect-auto md:h-full bg-cream">
+            <div className="overflow-hidden aspect-[16/11] md:aspect-auto md:min-h-[340px] bg-cream">
               <img
                 src={lead.image}
                 alt={lead.title}
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
               />
             </div>
             <div className="p-8 sm:p-10 lg:p-12 flex flex-col justify-center">

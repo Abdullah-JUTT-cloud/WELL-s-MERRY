@@ -23,6 +23,7 @@ const BlogPost = lazy(() => import("./pages/BlogPost.jsx"));
 const Outlets = lazy(() => import("./pages/Outlets.jsx"));
 const About = lazy(() => import("./pages/About.jsx"));
 const Orders = lazy(() => import("./pages/Orders.jsx"));
+const Shipping = lazy(() => import("./pages/Shipping.jsx"));
 
 // Admin pages
 const AdminLogin = lazy(() => import("./pages/admin/AdminLogin.jsx"));
@@ -89,6 +90,10 @@ function App() {
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="/outlets" element={<Outlets />} />
+          {/* Public policy page — linked from the footer, product pages and
+              each order's summary, so it deliberately sits outside the
+              ProtectedRoute block. */}
+          <Route path="/shipping" element={<Shipping />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/verify-otp" element={<VerifyOtp />} />

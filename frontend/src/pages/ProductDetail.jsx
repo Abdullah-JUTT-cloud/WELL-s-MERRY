@@ -106,9 +106,14 @@ const ProductDetail = () => {
 
   return (
     <div className="bg-[#f4f7f0] min-h-screen pb-20 select-none">
-      {/* Top Metallic Torn Paper Edge Decorative Divider (Responsive gap fix for mobile) */}
-      <div className="relative w-full overflow-hidden leading-none z-10 -mt-[90px] sm:-mt-[105px]">
-        <div className="h-[90px] sm:h-[105px] bg-ink" />
+      {/* Top Metallic Torn Paper Edge Decorative Divider.
+          `under-header` slides this up behind the transparent navbar, and the
+          solid band below fills the space the bar covers. Both derive from the
+          header's measured height, so they can't disagree — this used to be
+          two separately hardcoded numbers (-mt-[90px] and h-[90px]) that had
+          to be kept in sync by hand at each breakpoint. */}
+      <div className="relative w-full overflow-hidden leading-none z-10 under-header">
+        <div className="h-[var(--wm-header-h)] bg-ink" />
         <div className="h-2.5 sm:h-3 bg-gradient-to-r from-gold-1 via-gold-3 to-gold-1 shadow-md" />
         <svg
           viewBox="0 0 1200 60"
@@ -194,8 +199,10 @@ const ProductDetail = () => {
             </div>
           </div>
 
-          {/* Right Column: Sticky Product Info */}
-          <div className="lg:col-span-5 lg:sticky lg:top-28">
+          {/* Right Column: Sticky Product Info.
+              Sticky offset also tracks the header height so the panel parks
+              just below the bar rather than under it. */}
+          <div className="lg:col-span-5 lg:sticky lg:top-[calc(var(--wm-header-h)+1rem)]">
             {/* Reviews Line */}
             <div className="flex items-center gap-2 mb-2 sm:mb-3">
               <div className="flex items-center text-black">
@@ -294,6 +301,12 @@ const ProductDetail = () => {
                 <HiOutlineShieldCheck className="w-4 h-4 text-gold-1 shrink-0" />
                 <span>100% Organic Botanical Formula &amp; Chemical Free</span>
               </div>
+              <Link
+                to="/shipping"
+                className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-black/70 underline hover:text-black"
+              >
+                Shipping &amp; Returns
+              </Link>
             </div>
 
             {/* Product Accordion */}

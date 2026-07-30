@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { NavLink, Link } from "react-router-dom";
+import { NavLink, Link, useLocation } from "react-router-dom";
 import {
   HiOutlineShoppingBag,
   HiOutlineUser,
@@ -20,14 +20,32 @@ const NAV_LINKS = [
   { label: "Contact", to: "/contact" },
 ];
 
+// Routes whose first section is a full-bleed hero deliberately designed to run
+// *behind* the navbar. Only these get the transparent gradient treatment.
+//
+// Everywhere else the bar is solid ink. Previously the gradient was global,
+// which meant the cream nav text sat on whatever the page happened to start
+// with — fine over a dark hero, but low-contrast on the light pages (login,
+// register, checkout). That's the inconsistency this list resolves.
+//
+// Pages in this list pull themselves up under the header with `.under-header`.
+const HERO_ROUTES = ["/", "/shop"];
+
+const isHeroRoute = (pathname) =>
+  HERO_ROUTES.includes(pathname) || pathname.startsWith("/products/");
+
 const Header = () => {
   const { itemCount } = useCart();
   const { user, isAuthenticated, authLoading, logout } = useAuth();
+  const { pathname } = useLocation();
 
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const accountRef = useRef(null);
+  const headerRef = useRef(null);
+
+  const overlayHero = isHeroRoute(pathname);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -36,10 +54,44 @@ const Header = () => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Publish the header's real height as a CSS variable so hero pages can tuck
+  // themselves underneath by exactly the right amount. Each page used to
+  // hardcode `-mt-[90px] sm:-mt-[105px]`, which never matched the true height
+  // at every breakpoint (the logo scales h-9 → h-11 → h-14) and left a visible
+  // seam. Measuring removes the guesswork and survives the announcement bar
+  // wrapping to two lines on a narrow screen.
+  useEffect(() => {
+    const el = headerRef.current;
+    if (!el) return;
+
+    const publishHeight = () => {
+      document.documentElement.style.setProperty(
+        "--wm-header-h",
+        `${el.offsetHeight}px`
+      );
+    };
+
+    publishHeight();
+
+    // ResizeObserver is missing on some older mobile browsers; the static
+    // fallback value declared in index.css covers those.
+    if (typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(publishHeight);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
   }, [mobileOpen]);
+
+  // Close the mobile drawer on navigation, otherwise it stays open over the
+  // new page after tapping a link.
+  useEffect(() => {
+    setMobileOpen(false);
+    setAccountOpen(false);
+  }, [pathname]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -60,7 +112,7 @@ const Header = () => {
        : "text-cream/85 hover:text-gold-3 after:w-0 hover:after:w-full"}`;
 
   return (
-    <header className="sticky top-0 z-50 w-full transition-all duration-300">
+    <header ref={headerRef} className="sticky top-0 z-50 w-full">
       {/* Announcement bar */}
       <div className="bg-white text-black text-[10px] sm:text-[11px] font-bold tracking-[0.14em] uppercase py-1.5 overflow-hidden border-b border-white/20 select-none whitespace-nowrap">
         <div className="flex w-max animate-marquee">
@@ -80,12 +132,18 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Main navbar */}
+      {/* Main navbar.
+          Vertical padding stays constant across scroll states on purpose — it
+          used to shrink from py-2.5 to py-2, changing the header's height and
+          shifting every hero offset by a few pixels mid-scroll. Only the
+          background and shadow react to scrolling now. */}
       <div
-        className={`transition-all duration-300 ${
+        className={`py-2.5 border-b transition-[background-color,box-shadow] duration-300 ${
           scrolled
-            ? "bg-ink/97 backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.55)] py-2 border-b border-gold-2/10"
-            : "bg-gradient-to-b from-black/88 via-black/50 to-transparent py-2.5 border-b border-white/8"
+            ? "bg-ink/97 backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.55)] border-gold-2/10"
+            : overlayHero
+            ? "bg-gradient-to-b from-black/88 via-black/50 to-transparent border-white/8"
+            : "bg-ink border-gold-2/10"
         }`}
       >
         <div className="container-content flex items-center justify-between gap-2 px-4 sm:px-6">
@@ -93,6 +151,7 @@ const Header = () => {
           <div className="flex lg:hidden items-center flex-1">
             <button
               aria-label="Menu"
+              aria-expanded={mobileOpen}
               onClick={() => setMobileOpen(true)}
               className="text-cream hover:text-gold-3 transition-colors p-1.5 -ml-1"
             >
@@ -135,6 +194,7 @@ const Header = () => {
             <div className="relative" ref={accountRef}>
               <button
                 aria-label="Account"
+                aria-expanded={accountOpen}
                 onClick={() => setAccountOpen((v) => !v)}
                 className="flex items-center text-cream/85 hover:text-gold-3 transition-colors p-1.5"
               >
@@ -271,6 +331,13 @@ const Header = () => {
             >
               <HiOutlineShoppingBag className="w-4 h-4 text-gold-2" />
               Cart {itemCount > 0 && <span className="ml-1 bg-gold-2 text-ink text-[10px] font-bold px-1.5 py-0.5 rounded-full">{itemCount}</span>}
+            </Link>
+            <Link
+              to="/shipping"
+              onClick={() => setMobileOpen(false)}
+              className="py-3.5 border-b border-gold-2/10 text-[13px] tracking-[0.14em] uppercase font-semibold text-cream/85 hover:text-gold-3"
+            >
+              Shipping &amp; Returns
             </Link>
           </nav>
 

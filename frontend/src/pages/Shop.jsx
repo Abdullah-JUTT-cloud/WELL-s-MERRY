@@ -53,9 +53,13 @@ const Shop = () => {
 
   return (
     <div className="bg-[#fcfbf9] min-h-screen">
-      {/* Page Header (Responsive alignment fix for top transparent navbar) */}
-      <div className="bg-ink text-ivory py-12 sm:py-20 text-center relative overflow-hidden -mt-[90px] sm:-mt-[105px] pt-[130px] sm:pt-[150px] px-4 sm:px-6">
-        <div className="container-content relative z-10">
+      {/* Page header. Sits under the transparent navbar via `under-header`,
+          then `pt-header` restores the space the bar occupies so the eyebrow
+          never tucks behind it. Replaces the old hardcoded
+          `-mt-[90px] pt-[130px]` pairing, which had to be re-guessed at every
+          breakpoint and didn't match the header's real height. */}
+      <div className="bg-ink text-ivory text-center relative overflow-hidden under-header pt-header px-4 sm:px-6">
+        <div className="container-content relative z-10 py-12 sm:py-20">
           <span className="eyebrow mb-2 sm:mb-3 text-gold-3">EXCLUSIVE COLLECTION</span>
           <h1 className="font-display text-3xl sm:text-5xl lg:text-6xl text-white tracking-tight uppercase">
             {activeCategory ? activeCategory.replace("-", " ") : "OUR PRODUCTS"}
@@ -75,6 +79,7 @@ const Shop = () => {
               <button
                 key={cat.value}
                 onClick={() => handleCategoryChange(cat.value)}
+                aria-pressed={isActive}
                 className={`shrink-0 px-5 sm:px-6 py-2 sm:py-2.5 text-[11px] sm:text-[12px] tracking-[0.14em] font-semibold uppercase rounded-full border transition-all duration-300 ${
                   isActive
                     ? "bg-ink text-ivory border-ink shadow-md"
