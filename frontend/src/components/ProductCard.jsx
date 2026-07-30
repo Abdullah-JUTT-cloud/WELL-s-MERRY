@@ -21,19 +21,16 @@ const ProductCard = ({ product, onAdd }) => {
 
   return (
     <div className="group flex flex-col transition-all duration-300">
-      {/* Product Image Container (Aspect 4/5 portrait ratio with edge-to-edge cover to eliminate blank borders) */}
+      {/* Product Image Container */}
       <Link
         to={href}
-        className="aspect-[4/5] overflow-hidden bg-[#f0eee8] block relative mb-4 rounded-2xl border border-black/5 shadow-xs"
+        className="aspect-[4/5] overflow-hidden bg-[#fbf7ef] block relative mb-4 rounded-2xl border border-black/5 shadow-xs"
       >
         <img
           src={product.images?.[0] || product.image}
           alt={product.name}
-          className="w-full h-full object-cover object-center group-hover:scale-108 transition-transform duration-700 ease-out"
+          className="w-full h-full object-contain object-center p-2 transition-opacity duration-300 group-hover:opacity-95"
         />
-        
-        {/* Soft subtle bottom gradient overlay for luxury feel */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
         {outOfStock && (
           <span className="absolute top-3 left-3 bg-ink text-gold-3 text-[10px] tracking-[0.12em] uppercase px-3 py-1 font-semibold rounded-full shadow-md z-10">

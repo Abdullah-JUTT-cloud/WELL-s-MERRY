@@ -1,12 +1,21 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
-import { HiOutlineStar, HiOutlineMinus, HiOutlinePlus, HiOutlineShoppingBag, HiOutlineTruck, HiOutlineShieldCheck } from "react-icons/hi2";
+import {
+  HiOutlineStar,
+  HiOutlineMinus,
+  HiOutlinePlus,
+  HiOutlineShoppingBag,
+  HiOutlineTruck,
+  HiOutlineShieldCheck,
+  HiOutlineChevronDown,
+  HiOutlineMagnifyingGlassPlus,
+} from "react-icons/hi2";
 import { FaWhatsapp } from "react-icons/fa";
 import { getProductBySlug } from "../api/products.js";
 import { useCart } from "../context/CartContext.jsx";
 import { buildWhatsAppLink } from "../config/siteConfig.js";
-import Accordion from "../components/Accordion.jsx";
 import ReviewSection from "../components/ReviewSection.jsx";
+import ImageLightbox from "../components/ImageLightbox.jsx";
 
 const ProductDetail = () => {
   const { slug } = useParams();
@@ -17,6 +26,9 @@ const ProductDetail = () => {
   const [notFound, setNotFound] = useState(false);
   const [activeImage, setActiveImage] = useState(0);
   const [qty, setQty] = useState(1);
+  const [descriptionOpen, setDescriptionOpen] = useState(false);
+  // null when closed; otherwise the index the lightbox opened on.
+  const [lightboxIndex, setLightboxIndex] = useState(null);
 
   useEffect(() => {
     let ignore = false;
@@ -24,6 +36,7 @@ const ProductDetail = () => {
     setNotFound(false);
     setActiveImage(0);
     setQty(1);
+    setDescriptionOpen(false);
 
     (async () => {
       try {
@@ -109,9 +122,7 @@ const ProductDetail = () => {
       {/* Top Metallic Torn Paper Edge Decorative Divider.
           `under-header` slides this up behind the transparent navbar, and the
           solid band below fills the space the bar covers. Both derive from the
-          header's measured height, so they can't disagree — this used to be
-          two separately hardcoded numbers (-mt-[90px] and h-[90px]) that had
-          to be kept in sync by hand at each breakpoint. */}
+          header's measured height, so they can't disagree. */}
       <div className="relative w-full overflow-hidden leading-none z-10 under-header">
         <div className="h-[var(--wm-header-h)] bg-ink" />
         <div className="h-2.5 sm:h-3 bg-gradient-to-r from-gold-1 via-gold-3 to-gold-1 shadow-md" />
@@ -135,52 +146,62 @@ const ProductDetail = () => {
         </div>
 
         <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-start">
-          {/* Left Column: Image Gallery (Mobile optimized: Single primary container with thumbnail bar on mobile, grid on desktop) */}
+          {/* Left Column: Image Gallery. Clicking any image opens the zoom
+              viewer at that image. */}
           <div className="lg:col-span-7">
             {/* Desktop 2-column grid / Mobile 1-main view */}
             <div className="hidden sm:grid sm:grid-cols-2 gap-4">
               {imagesList.map((imgUrl, idx) => (
-                <div
+                <button
                   key={idx}
-                  onClick={() => setActiveImage(idx)}
-                  className={`relative rounded-3xl overflow-hidden bg-white shadow-sm border border-black/5 aspect-square cursor-pointer transition-all duration-300 flex items-center justify-center p-3 ${
-                    activeImage === idx ? "ring-2 ring-black" : "hover:opacity-95"
-                  }`}
+                  type="button"
+                  onClick={() => setLightboxIndex(idx)}
+                  aria-label={`Zoom ${displayTitle} view ${idx + 1}`}
+                  className="group relative rounded-3xl overflow-hidden bg-[#fbf7ef] shadow-sm border border-black/5 aspect-square cursor-zoom-in transition-all duration-300 hover:shadow-md"
                 >
                   <img
                     src={imgUrl}
                     alt={`${displayTitle} view ${idx + 1}`}
-                    className="w-full h-full object-contain"
+                    className="absolute inset-0 w-full h-full object-contain p-2 sm:p-3"
                   />
+
+                  {/* Zoom affordance — only shows on hover so it doesn't
+                      compete with the product photo at rest. */}
+                  <span className="absolute top-4 left-4 w-9 h-9 rounded-full bg-black/70 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                    <HiOutlineMagnifyingGlassPlus className="w-4.5 h-4.5" />
+                  </span>
+
                   {idx === 0 && (
                     <span className="absolute top-4 right-4 bg-[#a855f7] text-white text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-md z-10">
                       NEW!
                     </span>
                   )}
-                  {idx === 0 && (
-                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/85 backdrop-blur-md text-white text-[11px] font-semibold uppercase tracking-wider px-4 py-1.5 rounded-full shadow-lg flex items-center gap-2 whitespace-nowrap z-10">
-                      <span className="text-gold-3">✨</span> Top seller! Going fast
-                    </div>
-                  )}
-                </div>
+                </button>
               ))}
             </div>
 
             {/* Mobile Featured Image Container */}
             <div className="block sm:hidden">
-              <div className="relative rounded-2xl overflow-hidden bg-white shadow-sm border border-black/5 aspect-[4/5] flex items-center justify-center p-4">
+              <button
+                type="button"
+                onClick={() => setLightboxIndex(activeImage)}
+                aria-label={`Zoom ${displayTitle}`}
+                className="relative w-full rounded-2xl overflow-hidden bg-[#fbf7ef] shadow-sm border border-black/5 aspect-[4/5] cursor-zoom-in"
+              >
                 <img
                   src={imagesList[activeImage] || imagesList[0]}
                   alt={displayTitle}
-                  className="w-full h-full object-contain"
+                  className="absolute inset-0 w-full h-full object-contain p-2"
                 />
-                <span className="absolute top-3 right-3 bg-[#a855f7] text-white text-[9px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-md z-10">
-                  NEW!
+                <span className="absolute top-3 left-3 w-8 h-8 rounded-full bg-black/70 text-white flex items-center justify-center z-10">
+                  <HiOutlineMagnifyingGlassPlus className="w-4 h-4" />
                 </span>
-                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/85 backdrop-blur-md text-white text-[10px] font-semibold uppercase tracking-wider px-3.5 py-1 rounded-full shadow-lg flex items-center gap-1.5 whitespace-nowrap z-10">
-                  <span className="text-gold-3">✨</span> Top seller!
-                </div>
-              </div>
+                {activeImage === 0 && (
+                  <span className="absolute top-3 right-3 bg-[#a855f7] text-white text-[9px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-md z-10">
+                    NEW!
+                  </span>
+                )}
+              </button>
 
               {/* Mobile Horizontal Thumbnail Selector Bar */}
               <div className="flex gap-2.5 overflow-x-auto mt-3 pb-2 no-scrollbar">
@@ -188,20 +209,19 @@ const ProductDetail = () => {
                   <button
                     key={i}
                     onClick={() => setActiveImage(i)}
-                    className={`w-16 h-16 shrink-0 rounded-xl overflow-hidden bg-white border-2 transition-all p-1 flex items-center justify-center ${
+                    aria-label={`Show image ${i + 1}`}
+                    className={`w-16 h-16 shrink-0 rounded-xl overflow-hidden bg-[#fbf7ef] border-2 transition-all ${
                       activeImage === i ? "border-black scale-105 shadow-sm" : "border-black/10 opacity-70"
                     }`}
                   >
-                    <img src={img} alt={`Thumbnail ${i}`} className="w-full h-full object-contain" />
+                    <img src={img} alt="" className="w-full h-full object-contain p-1" />
                   </button>
                 ))}
               </div>
             </div>
           </div>
 
-          {/* Right Column: Sticky Product Info.
-              Sticky offset also tracks the header height so the panel parks
-              just below the bar rather than under it. */}
+          {/* Right Column: Sticky Product Info */}
           <div className="lg:col-span-5 lg:sticky lg:top-[calc(var(--wm-header-h)+1rem)]">
             {/* Reviews Line */}
             <div className="flex items-center gap-2 mb-2 sm:mb-3">
@@ -309,33 +329,91 @@ const ProductDetail = () => {
               </Link>
             </div>
 
-            {/* Product Accordion */}
-            <Accordion
-              items={[
-                { title: "Description", content: <p className="text-sm leading-relaxed text-black/80">{product.description}</p> },
-                {
-                  title: "Benefits",
-                  content: (
-                    <ul className="list-disc pl-5 space-y-1.5 text-sm text-black/80">
-                      {product.benefits?.map((b) => <li key={b}>{b}</li>)}
-                    </ul>
-                  ),
-                },
-                {
-                  title: "Ingredients",
-                  content: (
-                    <p className="text-sm leading-relaxed text-black/80">{product.ingredients?.join(", ")}</p>
-                  ),
-                },
-                { title: "How To Use", content: <p className="text-sm leading-relaxed text-black/80">{product.howToUse}</p> },
-              ]}
-            />
+            {/* Product Description — one collapsible row with a product
+                thumbnail on the left and a chevron on the right. Everything
+                that used to be split across four separate accordion panels
+                (description, benefits, ingredients, how to use) now lives
+                inside this single disclosure. */}
+            <div className="border-t border-b border-black/10">
+              <button
+                type="button"
+                onClick={() => setDescriptionOpen((v) => !v)}
+                aria-expanded={descriptionOpen}
+                className="w-full flex items-center gap-3 py-3.5 text-left group"
+              >
+                <span className="w-11 h-11 shrink-0 rounded-md overflow-hidden bg-white border border-black/10 flex items-center justify-center p-1">
+                  <img
+                    src={imagesList[0]}
+                    alt=""
+                    className="w-full h-full object-contain"
+                  />
+                </span>
+
+                <span className="flex-1 text-[14px] sm:text-[15px] font-medium text-black">
+                  Product Description
+                </span>
+
+                <HiOutlineChevronDown
+                  className={`w-4.5 h-4.5 shrink-0 text-black/50 transition-transform duration-300 ${
+                    descriptionOpen ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+
+              {descriptionOpen && (
+                <div className="pb-6 space-y-6 text-black/80">
+                  <p className="text-sm leading-relaxed">{product.description}</p>
+
+                  {product.benefits?.length > 0 && (
+                    <div>
+                      <h3 className="text-[11px] tracking-[0.14em] uppercase font-bold text-black/50 mb-2.5">
+                        Benefits
+                      </h3>
+                      <ul className="list-disc pl-5 space-y-1.5 text-sm">
+                        {product.benefits.map((b) => (
+                          <li key={b}>{b}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {product.ingredients?.length > 0 && (
+                    <div>
+                      <h3 className="text-[11px] tracking-[0.14em] uppercase font-bold text-black/50 mb-2.5">
+                        Ingredients
+                      </h3>
+                      <p className="text-sm leading-relaxed">
+                        {product.ingredients.join(", ")}
+                      </p>
+                    </div>
+                  )}
+
+                  {product.howToUse && (
+                    <div>
+                      <h3 className="text-[11px] tracking-[0.14em] uppercase font-bold text-black/50 mb-2.5">
+                        How To Use
+                      </h3>
+                      <p className="text-sm leading-relaxed">{product.howToUse}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
         {/* Reviews Section */}
         <ReviewSection product={product} onReviewAdded={handleReviewAdded} />
       </div>
+
+      {lightboxIndex !== null && (
+        <ImageLightbox
+          images={imagesList}
+          startIndex={lightboxIndex}
+          alt={displayTitle}
+          onClose={() => setLightboxIndex(null)}
+        />
+      )}
     </div>
   );
 };

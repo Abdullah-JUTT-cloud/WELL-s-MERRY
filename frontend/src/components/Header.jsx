@@ -20,20 +20,6 @@ const NAV_LINKS = [
   { label: "Contact", to: "/contact" },
 ];
 
-// Routes whose first section is a full-bleed hero deliberately designed to run
-// *behind* the navbar. Only these get the transparent gradient treatment.
-//
-// Everywhere else the bar is solid ink. Previously the gradient was global,
-// which meant the cream nav text sat on whatever the page happened to start
-// with — fine over a dark hero, but low-contrast on the light pages (login,
-// register, checkout). That's the inconsistency this list resolves.
-//
-// Pages in this list pull themselves up under the header with `.under-header`.
-const HERO_ROUTES = ["/", "/shop"];
-
-const isHeroRoute = (pathname) =>
-  HERO_ROUTES.includes(pathname) || pathname.startsWith("/products/");
-
 const Header = () => {
   const { itemCount } = useCart();
   const { user, isAuthenticated, authLoading, logout } = useAuth();
@@ -45,7 +31,7 @@ const Header = () => {
   const accountRef = useRef(null);
   const headerRef = useRef(null);
 
-  const overlayHero = isHeroRoute(pathname);
+  const transparentNav = pathname === "/" && !scrolled;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -109,7 +95,10 @@ const Header = () => {
      after:transition-all after:duration-300
      ${isActive
        ? "text-gold-3 after:w-full"
-       : "text-cream/85 hover:text-gold-3 after:w-0 hover:after:w-full"}`;
+       : "text-cream/90 hover:text-gold-3 after:w-0 hover:after:w-full [text-shadow:0_1px_10px_rgba(0,0,0,0.75)]"}`;
+
+  const iconTextClass =
+    "text-cream/90 hover:text-gold-3 [filter:drop-shadow(0_1px_6px_rgba(0,0,0,0.85))]";
 
   return (
     <header ref={headerRef} className="sticky top-0 z-50 w-full">
@@ -138,12 +127,8 @@ const Header = () => {
           shifting every hero offset by a few pixels mid-scroll. Only the
           background and shadow react to scrolling now. */}
       <div
-        className={`py-2.5 border-b transition-[background-color,box-shadow] duration-300 ${
-          scrolled
-            ? "bg-ink/97 backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.55)] border-gold-2/10"
-            : overlayHero
-            ? "bg-gradient-to-b from-black/88 via-black/50 to-transparent border-white/8"
-            : "bg-ink border-gold-2/10"
+        className={`py-2.5 shadow-none transition-colors duration-300 ${
+          transparentNav ? "bg-transparent" : "bg-ink"
         }`}
       >
         <div className="container-content flex items-center justify-between gap-2 px-4 sm:px-6">
@@ -153,7 +138,7 @@ const Header = () => {
               aria-label="Menu"
               aria-expanded={mobileOpen}
               onClick={() => setMobileOpen(true)}
-              className="text-cream hover:text-gold-3 transition-colors p-1.5 -ml-1"
+              className={`${iconTextClass} transition-colors p-1.5 -ml-1`}
             >
               <HiBars3 className="w-6 h-6" />
             </button>
@@ -174,17 +159,17 @@ const Header = () => {
               <img
                 src={logo}
                 alt="Well's Merry"
-                className="h-9 sm:h-11 lg:h-14 w-auto object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.6)] transition-transform duration-300 hover:scale-105"
+                className="h-9 sm:h-11 lg:h-14 w-auto object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.65)] transition-transform duration-300 hover:scale-105"
               />
             </Link>
           </div>
 
           {/* Action icons — right */}
-          <div className="flex items-center justify-end gap-2 sm:gap-4 flex-1 text-cream">
+          <div className="flex items-center justify-end gap-2 sm:gap-4 flex-1">
             {/* Track Order — desktop only */}
             <Link
               to="/account/orders"
-              className="hidden lg:flex items-center gap-1.5 text-cream/80 hover:text-gold-3 transition-colors text-[11px] tracking-[0.12em] uppercase font-semibold"
+              className={`hidden lg:flex items-center gap-1.5 transition-colors text-[11px] tracking-[0.12em] uppercase font-semibold ${iconTextClass}`}
             >
               <HiOutlineTruck className="w-4 h-4" />
               Track Order
@@ -196,7 +181,7 @@ const Header = () => {
                 aria-label="Account"
                 aria-expanded={accountOpen}
                 onClick={() => setAccountOpen((v) => !v)}
-                className="flex items-center text-cream/85 hover:text-gold-3 transition-colors p-1.5"
+                className={`flex items-center transition-colors p-1.5 ${iconTextClass}`}
               >
                 <HiOutlineUser className="w-5 h-5 sm:w-[22px] sm:h-[22px]" />
               </button>
@@ -262,7 +247,7 @@ const Header = () => {
             <Link
               to="/cart"
               aria-label={`Cart (${itemCount} items)`}
-              className="relative flex items-center text-cream/85 hover:text-gold-3 transition-colors p-1.5"
+              className={`relative flex items-center transition-colors p-1.5 ${iconTextClass}`}
             >
               <HiOutlineShoppingBag className="w-5 h-5 sm:w-[22px] sm:h-[22px]" />
               {itemCount > 0 && (

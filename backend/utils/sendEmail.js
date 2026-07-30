@@ -1,4 +1,11 @@
 import nodemailer from "nodemailer";
+import { existsSync } from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const brandLogoPath = path.resolve(__dirname, "../../frontend/src/assets/logo.jpg");
 
 const sendEmail = async (options) => {
   const transporter = nodemailer.createTransport({
@@ -14,6 +21,18 @@ const sendEmail = async (options) => {
     to: options.to,
     subject: options.subject,
     html: options.html,
+    attachments: [
+      ...(existsSync(brandLogoPath)
+        ? [
+            {
+              filename: "logo.jpg",
+              path: brandLogoPath,
+              cid: "wells-merry-logo",
+            },
+          ]
+        : []),
+      ...(options.attachments || []),
+    ],
   };
 
   await transporter.sendMail(mailOptions);
