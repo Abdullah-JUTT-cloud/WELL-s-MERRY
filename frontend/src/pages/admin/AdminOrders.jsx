@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { adminGetOrders, adminUpdateOrderStatus } from "../../api/admin.js";
+import { AdminTableSkeleton } from "../../components/Skeleton.jsx";
 
 const STATUS_COLORS = {
   placed: "bg-yellow-100 text-yellow-800",
@@ -13,8 +14,18 @@ const STATUS_COLORS = {
 export default function AdminOrders() {
   const [orders, setOrders] = useState([]);
   const [filter, setFilter] = useState("");
+  // Distinguishes "still fetching" from "genuinely no orders" — the table
+  // previously showed its empty state during every load and on every filter
+  // change, which looked like the filter had returned nothing.
+  const [loading, setLoading] = useState(true);
 
-  const load = () => adminGetOrders(filter || undefined).then(setOrders).catch(() => {});
+  const load = () => {
+    setLoading(true);
+    return adminGetOrders(filter || undefined)
+      .then(setOrders)
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  };
   useEffect(() => { load(); }, [filter]);
 
   const handleStatus = async (id, orderStatus) => {
@@ -43,6 +54,9 @@ export default function AdminOrders() {
         ))}
       </div>
 
+      {loading ? (
+        <AdminTableSkeleton columns={8} rows={6} />
+      ) : (
       <div className="overflow-x-auto">
         <table className="w-full text-sm border-collapse">
           <thead>
@@ -92,6 +106,7 @@ export default function AdminOrders() {
           </tbody>
         </table>
       </div>
+      )}
     </div>
   );
 }

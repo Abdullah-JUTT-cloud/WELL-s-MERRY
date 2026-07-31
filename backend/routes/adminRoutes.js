@@ -7,16 +7,22 @@ import {
 } from "../controllers/adminController.js";
 import { adminProtect } from "../middleware/adminAuthMiddleware.js";
 import { upload } from "../utils/cloudinary.js";
+import {
+  adminLoginLimiter,
+  refreshLimiter,
+  uploadLimiter,
+} from "../middleware/rateLimitMiddleware.js";
 
 const router = express.Router();
 
 // Auth (public)
-router.post("/login", adminLogin);
-router.post("/refresh", adminRefresh);
+router.post("/login", adminLoginLimiter, adminLogin);
+router.post("/refresh", refreshLimiter, adminRefresh);
 router.post("/logout", adminLogout);
 
-// Image upload (protected)
-router.post("/upload", adminProtect, upload.array("images", 10), adminUploadImages);
+// Image upload (protected). The limiter runs before adminProtect so a flood of
+// unauthenticated upload attempts is rejected without touching Cloudinary.
+router.post("/upload", uploadLimiter, adminProtect, upload.array("images", 10), adminUploadImages);
 
 // Products (protected)
 router.get("/products", adminProtect, adminGetProducts);

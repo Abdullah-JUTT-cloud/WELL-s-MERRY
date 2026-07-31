@@ -11,28 +11,65 @@ import orderRoutes from "./routes/orderRoutes.js";
 import outletRoutes from "./routes/outletRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
+import {
+  secureHeaders,
+  preventParamPollution,
+  sanitizeRequest,
+  enforceContentType,
+} from "./middleware/securityMiddleware.js";
+import { generalLimiter } from "./middleware/rateLimitMiddleware.js";
 
 connectDB();
 
 const app = express();
 
-const allowedOrigins = (process.env.CLIENT_URL || "").split(",").map(o => o.trim());
+// Behind a reverse proxy (Render, Railway, Nginx, Cloudflare…) the socket
+// address is the proxy's, not the visitor's. Without this every request looks
+// like it came from one IP and the rate limiters would throttle the entire
+// user base as a single client. Off by default so a directly-exposed server
+// can't be fooled by a spoofed X-Forwarded-For header.
+if (process.env.TRUST_PROXY === "true") {
+  app.set("trust proxy", 1);
+}
+
+// Don't advertise the stack we're running on.
+app.disable("x-powered-by");
+
+// --- Security middleware ---------------------------------------------------
+// Order matters here. Headers first so even an early rejection carries them,
+// then CORS, then body parsing, then sanitisation of the parsed result.
+app.use(secureHeaders);
+
+const allowedOrigins = (process.env.CLIENT_URL || "").split(",").map(o => o.trim()).filter(Boolean);
 
 app.use(cors({
   origin: allowedOrigins,
   credentials: true,
 }));
 
-app.use(express.json({ limit: "1mb" })); // prevent oversized payloads (DoS protection)
+app.use(enforceContentType);
+
+app.use(express.json({ limit: "100kb" })); // prevent oversized payloads (DoS protection)
+app.use(express.urlencoded({ extended: true, limit: "100kb" }));
 app.use(cookieParser());
+
+// Runs after the parsers because both need a populated req.body/req.query.
+app.use(sanitizeRequest);      // strips Mongo operators ($ne, $gt, dotted paths)
+app.use(preventParamPollution); // collapses repeated query params to one value
 
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
 
+// Health check sits above the limiter so uptime monitors polling every few
+// seconds never eat into the API budget.
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok", message: "Well's Merry API is running" });
 });
+
+// Baseline ceiling for the whole API. Individual sensitive routes add their own
+// much tighter limiters on top (see middleware/rateLimitMiddleware.js).
+app.use("/api", generalLimiter);
 
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);

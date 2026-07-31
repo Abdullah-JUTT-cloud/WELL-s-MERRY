@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { getProducts } from "../api/products.js";
 import { useCart } from "../context/CartContext.jsx";
 import ProductCard from "../components/ProductCard.jsx";
+import { ProductGridSkeleton } from "../components/Skeleton.jsx";
 
 const CATEGORIES = [
   { value: "", label: "ALL PRODUCTS" },
@@ -94,15 +95,12 @@ const Shop = () => {
 
         {/* States: Loading / Error / Content */}
         {loading ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-8">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="animate-pulse space-y-3">
-                <div className="aspect-[4/5] bg-cream/70 rounded-2xl" />
-                <div className="h-3.5 w-3/4 bg-cream/70 rounded-xs" />
-                <div className="h-3 w-1/2 bg-cream/70 rounded-xs" />
-              </div>
-            ))}
-          </div>
+          /* Same grid classes as the loaded state below, so the placeholders
+             sit exactly where the real cards will land. */
+          <ProductGridSkeleton
+            count={8}
+            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-3 sm:gap-x-7 gap-y-8 sm:gap-y-12"
+          />
         ) : error ? (
           <div className="text-center py-16">
             <p className="text-ink/60 mb-4">We couldn't load products right now.</p>

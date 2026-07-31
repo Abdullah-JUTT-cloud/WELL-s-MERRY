@@ -13,6 +13,7 @@ import {
   HiOutlineCreditCard,
 } from "react-icons/hi2";
 import { getMyOrders } from "../api/orders.js";
+import { OrderListSkeleton } from "../components/Skeleton.jsx";
 
 const STATUS_STYLES = {
   placed: "bg-cream text-ink/70",
@@ -441,14 +442,7 @@ const Orders = () => {
 
       <div className="container-content py-12 sm:py-16 max-w-3xl mx-auto">
         {loading ? (
-          <div className="space-y-4">
-            {[...Array(3)].map((_, i) => (
-              <div
-                key={i}
-                className="h-24 border border-cream-dim bg-cream animate-pulse rounded-sm"
-              />
-            ))}
-          </div>
+          <OrderListSkeleton count={3} />
         ) : error ? (
           <div className="text-center py-16">
             <p className="text-ink/60 mb-4">Couldn't load your orders right now.</p>

@@ -9,6 +9,7 @@ import {
 } from "react-icons/hi2";
 import { getOutlets, getNearbyOutlets } from "../api/outlets.js";
 import { buildWhatsAppLink } from "../config/siteConfig.js";
+import { OutletGridSkeleton } from "../components/Skeleton.jsx";
 
 const Outlets = () => {
   const [outlets, setOutlets] = useState([]);
@@ -108,15 +109,7 @@ const Outlets = () => {
         </div>
 
         {loading ? (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="border border-cream-dim p-7 animate-pulse space-y-3">
-                <div className="h-4 w-2/3 bg-cream" />
-                <div className="h-3 w-full bg-cream" />
-                <div className="h-3 w-1/2 bg-cream" />
-              </div>
-            ))}
-          </div>
+          <OutletGridSkeleton count={3} />
         ) : outlets.length > 0 ? (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {outlets.map((outlet) => (

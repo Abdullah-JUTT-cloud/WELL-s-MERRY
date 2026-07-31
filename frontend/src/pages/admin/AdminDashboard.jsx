@@ -3,10 +3,14 @@ import { Link } from "react-router-dom";
 import { useAdmin } from "../../context/AdminContext.jsx";
 import { adminGetOrders } from "../../api/admin.js";
 import { adminGetProducts } from "../../api/admin.js";
+import { AdminStatsSkeleton } from "../../components/Skeleton.jsx";
 
 export default function AdminDashboard() {
   const { logout } = useAdmin();
   const [stats, setStats] = useState({ orders: 0, products: 0, revenue: 0, pending: 0 });
+  // Without this the dashboard rendered zeroes while the request was still in
+  // flight, which reads as "you have no orders" rather than "still loading".
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     Promise.all([adminGetOrders(), adminGetProducts()]).then(([orders, products]) => {
@@ -14,7 +18,7 @@ export default function AdminDashboard() {
         .reduce((s, o) => s + o.totalPrice, 0);
       const pending = orders.filter(o => o.orderStatus === "placed").length;
       setStats({ orders: orders.length, products: products.length, revenue, pending });
-    }).catch(() => {});
+    }).catch(() => {}).finally(() => setLoading(false));
   }, []);
 
   const cards = [
@@ -34,6 +38,10 @@ export default function AdminDashboard() {
       </header>
 
       <main className="p-6 max-w-5xl mx-auto">
+        {loading ? (
+          <AdminStatsSkeleton />
+        ) : (
+        <>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
           {cards.map((c) => (
             <Link key={c.label} to={c.to}
@@ -62,6 +70,8 @@ export default function AdminDashboard() {
             </div>
           </Link>
         </div>
+        </>
+        )}
       </main>
     </div>
   );

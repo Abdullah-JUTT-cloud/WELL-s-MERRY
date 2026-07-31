@@ -4,6 +4,7 @@ import { HiOutlineCheckCircle, HiOutlineTruck } from "react-icons/hi2";
 import { getOrderById } from "../api/orders.js";
 import { useAuth } from "../context/AuthContext.jsx";
 import { buildWhatsAppLink } from "../config/siteConfig.js";
+import { OrderSummarySkeleton } from "../components/Skeleton.jsx";
 
 const OrderConfirmation = () => {
   const { id } = useParams();
@@ -51,8 +52,8 @@ const OrderConfirmation = () => {
 
   if (loading || authLoading) {
     return (
-      <div className="container-content py-24 flex justify-center">
-        <div className="w-8 h-8 border-2 border-gold-2 border-t-transparent rounded-full animate-spin" />
+      <div className="container-content py-14 sm:py-20">
+        <OrderSummarySkeleton />
       </div>
     );
   }

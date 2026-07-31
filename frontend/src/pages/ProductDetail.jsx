@@ -16,6 +16,7 @@ import { useCart } from "../context/CartContext.jsx";
 import { buildWhatsAppLink } from "../config/siteConfig.js";
 import ReviewSection from "../components/ReviewSection.jsx";
 import ImageLightbox from "../components/ImageLightbox.jsx";
+import { ProductDetailSkeleton } from "../components/Skeleton.jsx";
 
 const ProductDetail = () => {
   const { slug } = useParams();
@@ -80,15 +81,7 @@ const ProductDetail = () => {
     return (
       <div className="bg-[#f4f7f0] min-h-screen py-16">
         <div className="container-content">
-          <div className="grid lg:grid-cols-2 gap-12 animate-pulse">
-            <div className="aspect-square bg-white rounded-3xl" />
-            <div className="space-y-4 pt-4">
-              <div className="h-4 w-32 bg-white rounded-md" />
-              <div className="h-10 w-3/4 bg-white rounded-md" />
-              <div className="h-8 w-1/3 bg-white rounded-md" />
-              <div className="h-12 w-full bg-white rounded-md mt-6" />
-            </div>
-          </div>
+          <ProductDetailSkeleton />
         </div>
       </div>
     );

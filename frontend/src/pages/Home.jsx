@@ -12,6 +12,7 @@ import {
 import { useReveal } from "../hooks/useReveal.js";
 import { useCart } from "../context/CartContext.jsx";
 import { getProducts } from "../api/products.js";
+import { ProductGridSkeleton } from "../components/Skeleton.jsx";
 
 import slide1Img from "../assets/11.png";
 import slide2Img from "../assets/2.png";
@@ -276,21 +277,20 @@ const Home = () => {
             <h2 className="font-display text-2xl sm:text-4xl">Shop The Collection</h2>
           </div>
 
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-7">
-            {loadingProducts
-              ? [...Array(2)].map((_, i) => (
-                  <div key={i} className="border border-cream-dim animate-pulse p-2">
-                    <div className="aspect-[4/5] bg-cream rounded-xl" />
-                    <div className="p-3 space-y-2">
-                      <div className="h-3 w-1/3 bg-cream rounded-xs" />
-                      <div className="h-4 w-2/3 bg-cream rounded-xs" />
-                    </div>
-                  </div>
-                ))
-              : featured.map((product) => (
-                  <ProductCard key={product._id} product={product} onAdd={handleQuickAdd} />
-                ))}
-          </div>
+          {loadingProducts ? (
+            /* Featured row is 3-up on desktop, so the skeleton matches that
+               grid rather than Shop's 4-up catalogue grid. */
+            <ProductGridSkeleton
+              count={3}
+              className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-7"
+            />
+          ) : (
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-7">
+              {featured.map((product) => (
+                <ProductCard key={product._id} product={product} onAdd={handleQuickAdd} />
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

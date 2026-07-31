@@ -11,16 +11,23 @@ import {
   getMe,
 } from "../controllers/authController.js";
 import { protect } from "../middleware/authMiddleware.js";
+import {
+  authLimiter,
+  otpVerifyLimiter,
+  otpResendLimiter,
+  refreshLimiter,
+  passwordResetLimiter,
+} from "../middleware/rateLimitMiddleware.js";
 
 const router = express.Router();
 
-router.post("/register", registerUser);
-router.post("/verify-otp", verifyOtp);
-router.post("/resend-otp", resendOtp);
-router.post("/login", loginUser);
-router.post("/refresh", refreshAccessToken);
-router.post("/forgot-password", forgotPassword);
-router.post("/reset-password", resetPassword);
+router.post("/register", authLimiter, registerUser);
+router.post("/verify-otp", otpVerifyLimiter, verifyOtp);
+router.post("/resend-otp", otpResendLimiter, resendOtp);
+router.post("/login", authLimiter, loginUser);
+router.post("/refresh", refreshLimiter, refreshAccessToken);
+router.post("/forgot-password", passwordResetLimiter, forgotPassword);
+router.post("/reset-password", passwordResetLimiter, resetPassword);
 
 router.get("/me", protect, getMe);
 router.post("/logout", protect, logoutUser);
