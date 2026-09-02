@@ -9,10 +9,17 @@ export const createOrder = asyncHandler(async (req, res) => {
   // When paymentMethod is "online", the request is multipart/form-data
   // so fields come as flat strings that need parsing.
   let { orderItems, shippingAddress, paymentMethod, guestEmail, notes } = req.body;
+  if (typeof guestEmail === "string") guestEmail = guestEmail.trim();
 
-  // Parse JSON strings from FormData if needed
-  if (typeof orderItems === "string") orderItems = JSON.parse(orderItems);
-  if (typeof shippingAddress === "string") shippingAddress = JSON.parse(shippingAddress);
+  // Parse JSON strings from FormData if needed. A malformed body must 400,
+  // not 500 — JSON.parse throwing here used to crash the route.
+  try {
+    if (typeof orderItems === "string") orderItems = JSON.parse(orderItems);
+    if (typeof shippingAddress === "string") shippingAddress = JSON.parse(shippingAddress);
+  } catch {
+    res.status(400);
+    throw new Error("Invalid order payload");
+  }
 
   if (!orderItems || orderItems.length === 0) {
     res.status(400);
@@ -105,6 +112,8 @@ export const createOrder = asyncHandler(async (req, res) => {
     throw new Error("Email is required for guest checkout");
   }
 
+  // Never read a user id from the body — guests omit it, and a leftover
+  // empty string would CastError on ObjectId. Auth comes only from the token.
   const order = await Order.create({
     user: req.user ? req.user._id : null,
     isGuestOrder,

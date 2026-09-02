@@ -6,7 +6,9 @@ const api = axios.create({
   withCredentials: true, // sends the httpOnly refreshToken cookie automatically
 });
 
-// Attach the current access token to every outgoing request
+// Attach the current access token to every outgoing request.
+// Memory first, then localStorage — checkout also sets this header
+// explicitly, but every other call (refresh, my-orders) needs it too.
 api.interceptors.request.use((config) => {
   const token = getAccessToken();
   if (token) {

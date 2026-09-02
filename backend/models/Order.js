@@ -34,7 +34,15 @@ const extraChargeSchema = new mongoose.Schema(
 
 const orderSchema = new mongoose.Schema(
   {
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
+    // Guest checkout is first-class: a missing user id must not fail validation.
+    // `required: false` + default null is what lets COD/online guest payloads
+    // through without a CastError / ValidationError on `user`.
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+      required: false,
+    },
     isGuestOrder: { type: Boolean, default: false },
     guestEmail: { type: String, trim: true, lowercase: true },
     orderItems: {

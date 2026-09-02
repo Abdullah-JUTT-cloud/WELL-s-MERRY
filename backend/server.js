@@ -40,11 +40,25 @@ app.disable("x-powered-by");
 // then CORS, then body parsing, then sanitisation of the parsed result.
 app.use(secureHeaders);
 
-const allowedOrigins = (process.env.CLIENT_URL || "").split(",").map(o => o.trim()).filter(Boolean);
+// Production checkout was failing because CLIENT_URL was unset/mismatched,
+// so the API rejected every browser request from the Vercel frontend.
+// Always allow the known shop origins, then merge any extra hosts from env
+// (comma-separated) so preview deploys can be added without a code change.
+const defaultOrigins = [
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  "https://well-s-merry.vercel.app",
+];
+const envOrigins = (process.env.CLIENT_URL || "")
+  .split(",")
+  .map((o) => o.trim())
+  .filter(Boolean);
+const allowedOrigins = [...new Set([...defaultOrigins, ...envOrigins])];
 
 app.use(cors({
   origin: allowedOrigins,
   credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
 }));
 
 app.use(enforceContentType);
