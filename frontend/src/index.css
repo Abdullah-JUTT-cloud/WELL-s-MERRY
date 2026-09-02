@@ -431,7 +431,10 @@ body {
    pins, popups, zoom control, attribution.
    ========================================================== */
 
-.merry-map {
+/* Leaflet's own `.leaflet-container { background:#ddd }` ships later in
+   the cascade, so match its specificity (+class) to keep the forest
+   base visible whenever tiles are slow or unavailable. */
+.merry-map.leaflet-container {
   background: #1a2e24;
   font-family: Archivo, Jost, sans-serif;
   z-index: 0; /* keep map chrome under sticky nav */
@@ -448,8 +451,9 @@ body {
   background: #c17754;
 }
 
-.merry-map .leaflet-control-attribution {
-  background: rgba(26, 46, 36, 0.85);
+.merry-map .leaflet-control-attribution,
+.merry-map.leaflet-container .leaflet-control-attribution {
+  background: rgba(26, 46, 36, 0.85) !important;
   color: #9db4a4;
   font-size: 10px;
   padding: 1px 6px;
