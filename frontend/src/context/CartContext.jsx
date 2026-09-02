@@ -1,4 +1,11 @@
-import { createContext, useContext, useReducer, useEffect, useMemo } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useReducer,
+  useState,
+} from "react";
 import toast from "react-hot-toast";
 
 const CartContext = createContext(null);
@@ -58,6 +65,19 @@ function cartReducer(state, action) {
 
 export const CartProvider = ({ children }) => {
   const [items, dispatch] = useReducer(cartReducer, [], loadInitialCart);
+
+  /* -------------------------------------------------------------------
+     Side-cart drawer open state — ONE source of truth.
+
+     This used to be local `useState` inside MerryLayout, which meant the
+     only way to close the drawer was an `onClose` prop threaded down into
+     CartDrawer. Anything rendered without that prop (or a second consumer
+     that forgot it) produced a drawer whose close button did nothing.
+     Owning it here means every consumer — Navbar, CartDrawer, a page, a
+     toast action — opens and closes the exact same piece of state via
+     `setIsCartOpen(true | false)`.
+     ------------------------------------------------------------------- */
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
   // Persist to localStorage on every change. Cart contents are not
   // sensitive data (unlike auth tokens), so localStorage is the right
@@ -120,7 +140,18 @@ export const CartProvider = ({ children }) => {
     [items]
   );
 
-  const value = { items, addItem, removeItem, setQty, clearCart, itemCount, subtotal };
+  const value = {
+    items,
+    addItem,
+    removeItem,
+    setQty,
+    clearCart,
+    itemCount,
+    subtotal,
+    // Side-cart drawer open state (see note above)
+    isCartOpen,
+    setIsCartOpen,
+  };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 };

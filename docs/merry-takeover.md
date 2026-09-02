@@ -48,9 +48,15 @@ scripts/ssr-check.mjs         ← SSR smoke harness (node scripts/ssr-check.mjs)
 Key contracts:
 
 - **MerryLayout** wraps every merry route (router `<Outlet />` mode);
-  it owns the cart drawer and applies `.theme-merry` (slab headings).
+  it renders the cart drawer and applies `.theme-merry` (slab headings).
   `/cart` and `/account/orders` now sit inside this branch, so they
   inherit the organic Navbar + Footer instead of the legacy shell.
+- **Cart drawer open state lives in `CartContext`** (`isCartOpen` /
+  `setIsCartOpen`), not in MerryLayout. The Navbar sets it to `true`;
+  `CartDrawer`'s "X", its backdrop, Escape and the
+  "View full cart" / "Checkout" links set it to `false` — the links close
+  the drawer *before* navigating, so the panel is never left on top of
+  the page it just routed to.
 - **AuthLayout** is the auth shell and deliberately sits *outside* both
   site layouts — it is full-screen by design: `w-1/2` edge-to-edge
   visual (hidden below `lg`) + `w-1/2` cream form column. Pair it with
