@@ -15,10 +15,9 @@ import { LeafIcon } from "./icons.jsx";
 const NAV_LINKS = [
   { label: "Home", to: "/" },
   { label: "Shop", to: "/shop" },
-  { label: "About", to: "/about" },
-  { label: "Blog", to: "/blog" },
+  { label: "Our Story", to: "/story" },
+  { label: "Hair Quiz", to: "/quiz" },
   { label: "Outlets", to: "/outlets" },
-  { label: "Contact", to: "/contact" },
 ];
 
 /* Neo-brutalist "press" interaction shared by the nav buttons:

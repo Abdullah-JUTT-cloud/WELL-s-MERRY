@@ -17,4 +17,5 @@ export { default as InfiniteMarquee } from "./InfiniteMarquee.jsx";
 export { default as MagneticProductCard } from "./MagneticProductCard.jsx";
 export { default as PinnedFeatures } from "./PinnedFeatures.jsx";
 export { default as CollageTimeline } from "./CollageTimeline.jsx";
+export { default as MerryMap } from "./MerryMap.jsx";
 export * from "./icons.jsx";
