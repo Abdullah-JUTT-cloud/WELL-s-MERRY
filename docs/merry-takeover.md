@@ -13,9 +13,9 @@ separately.
 | `/` | `src/pages/merry/HomeMerry.jsx` | merry | Split hero → marquee → magnetic grid → pinned features |
 | `/shop` | `src/pages/merry/ShopMerry.jsx` | merry | Banner + quiz CTA, filter tabs, 9 mock products |
 | `/story` | `src/pages/merry/StoryMerry.jsx` | merry | Overlay hero + collage timeline + pledge band |
-| `/quiz` | `src/pages/merry/QuizMerry.jsx` | merry | 4-step full-screen form → personalized match |
+| `/quiz` | `src/pages/merry/QuizMerry.jsx` | merry | 4-step full-screen form → personalized match → add to cart |
 | `/outlets` | `src/pages/merry/OutletsMerry.jsx` | merry | Asymmetric cards + Leaflet map (Forest & Cream) |
-| `/product/:slug` | `src/pages/ProductDetail.jsx` (legacy page) | mixed | Registered inside the merry branch so card links resolve; page reskin pending |
+| `/product/:slug` | `src/pages/merry/ProductDetailMerry.jsx` | merry | Full merry PDP: gallery, size/qty, accordions, reviews, related |
 | `/cart`, `/checkout`, `/about`, `/blog`, … | `src/pages/*` | gold | Untouched legacy routes |
 
 Router precedence: the merry `<Route element={<MerryLayout />}>` branch
@@ -82,5 +82,6 @@ removing the fallback, not rewriting pages:
   network; offline previews fall back to system serif.
 - Map tiles come from `tile.openstreetmap.org` — behind some corporate
   firewalls the forest base shows instead of tiles (graceful).
-- `/product/:slug` still uses the legacy PDP markup on the merry
-  layout; a merry PDP reskin is the natural next PR.
+- `/products/:slug` (plural, legacy gold layout) still serves the old
+  PDP for the utility pages' links; the merry flow uses
+  `/product/:slug`. Consolidate when the remaining pages migrate.

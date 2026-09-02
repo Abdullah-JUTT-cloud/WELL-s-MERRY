@@ -72,24 +72,26 @@ import ShopMerry from "./src/pages/merry/ShopMerry.jsx";
 import StoryMerry from "./src/pages/merry/StoryMerry.jsx";
 import QuizMerry from "./src/pages/merry/QuizMerry.jsx";
 import OutletsMerry from "./src/pages/merry/OutletsMerry.jsx";
+import ProductDetailMerry from "./src/pages/merry/ProductDetailMerry.jsx";
 import MerryMap from "./src/components/merry/MerryMap.jsx";
 import { MERRY_OUTLETS } from "./src/data/merry/mock.js";
 
 const routes = {
-  "/ (HomeMerry)": HomeMerry,
-  "/shop (ShopMerry)": ShopMerry,
-  "/story (StoryMerry)": StoryMerry,
-  "/quiz (QuizMerry)": QuizMerry,
-  "/outlets (OutletsMerry)": OutletsMerry,
+  "/ (HomeMerry)": ["/", HomeMerry],
+  "/shop (ShopMerry)": ["/shop", ShopMerry],
+  "/story (StoryMerry)": ["/story", StoryMerry],
+  "/quiz (QuizMerry)": ["/quiz", QuizMerry],
+  "/outlets (OutletsMerry)": ["/outlets", OutletsMerry],
+  "/product/:slug (PDP)": ["/product/hair-care-oil", ProductDetailMerry],
 };
 
 const results = [];
-for (const [label, Page] of Object.entries(routes)) {
+for (const [label, [entry, Page]] of Object.entries(routes)) {
   try {
     const html = renderToString(
       React.createElement(
         MemoryRouter,
-        { initialEntries: ["/"] },
+        { initialEntries: [entry] },
         React.createElement(CartProvider, null, React.createElement(Page))
       )
     );

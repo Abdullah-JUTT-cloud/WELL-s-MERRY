@@ -14,6 +14,7 @@ const ShopMerry = lazy(() => import("./pages/merry/ShopMerry.jsx"));
 const StoryMerry = lazy(() => import("./pages/merry/StoryMerry.jsx"));
 const QuizMerry = lazy(() => import("./pages/merry/QuizMerry.jsx"));
 const OutletsMerry = lazy(() => import("./pages/merry/OutletsMerry.jsx"));
+const ProductDetailMerry = lazy(() => import("./pages/merry/ProductDetailMerry.jsx"));
 
 const Home = lazy(() => import("./pages/Home.jsx"));
 const Shop = lazy(() => import("./pages/Shop.jsx"));
@@ -93,12 +94,10 @@ function App() {
           <Route path="/story" element={<StoryMerry />} />
           <Route path="/quiz" element={<QuizMerry />} />
           <Route path="/outlets" element={<OutletsMerry />} />
-          {/* PDP — merry cards link /product/:slug (the legacy gold layout
-              only registered /products/:slug). Rendered inside MerryLayout
-              so the takeover chrome stays consistent; the page itself is
-              theme-agnostic and feeds off the shared mock fallback. This
-              also repairs the apocalypse slider's /product/... links. */}
-          <Route path="/product/:slug" element={<ProductDetail />} />
+          {/* PDP — full merry reskin. Serves both the mock catalog and the
+              live API (same data contract as the legacy page, which stays
+              registered under /products/:slug for the gold layout). */}
+          <Route path="/product/:slug" element={<ProductDetailMerry />} />
         </Route>
 
         {/* Public site */}
