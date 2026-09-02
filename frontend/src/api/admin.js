@@ -1,10 +1,13 @@
 import axios from "axios";
-
-const BASE = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+import { API_BASE_URL } from "./baseUrl.js";
 
 // Separate axios instance for admin — uses its own in-memory token store
 // and the adminRefreshToken cookie (distinct from the customer cookie).
-const adminApi = axios.create({ baseURL: BASE, withCredentials: true });
+//
+// Shares the shopper client's base URL: the admin dashboard used to resolve
+// VITE_API_URL independently, so a bare-origin value would have broken the
+// dashboard and checkout in two different places.
+const adminApi = axios.create({ baseURL: API_BASE_URL, withCredentials: true });
 
 let adminToken = null;
 export const getAdminToken = () => adminToken;
