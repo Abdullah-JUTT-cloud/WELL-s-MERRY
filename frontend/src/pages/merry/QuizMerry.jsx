@@ -1,8 +1,9 @@
 import { useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { HiArrowLeft, HiArrowRight, HiCheck } from "react-icons/hi2";
+import { HiArrowLeft, HiArrowRight, HiCheck, HiOutlineShoppingBag } from "react-icons/hi2";
 import { LeafIcon, SparkIcon, BottleIcon } from "../../components/merry/index.js";
+import { useCart } from "../../context/CartContext.jsx";
 import { MERRY_QUIZ_STEPS, recommend } from "../../data/merry/mock.js";
 
 /* =====================================================================
@@ -25,6 +26,7 @@ const variants = {
 
 const Quiz = () => {
   const reduce = useReducedMotion();
+  const { addItem } = useCart();
   const [stepIndex, setStepIndex] = useState(0);
   const [answers, setAnswers] = useState({});
   const dir = useRef(1);
@@ -235,20 +237,28 @@ const Quiz = () => {
                       </p>
 
                       <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-                        <Link
-                          to={`/product/${result.product.slug}`}
+                        <button
+                          type="button"
+                          onClick={() => addItem(result.product, 1)}
                           className="pressable inline-flex items-center justify-center gap-3 border-4 border-merry-cream bg-merry-clay px-7 py-4 font-slab text-base uppercase tracking-wide text-merry-cream shadow-hard-merry-cream"
                         >
-                          Get your match
-                          <HiArrowRight className="h-5 w-5" />
-                        </Link>
+                          <HiOutlineShoppingBag className="h-5 w-5" />
+                          Add to cart
+                        </button>
                         <Link
-                          to="/shop"
-                          className="inline-flex items-center justify-center gap-2 border-b-2 border-merry-cream/60 pb-1 font-slab text-xs uppercase tracking-widest2 text-merry-cream/85 transition-colors hover:border-merry-cream hover:text-merry-cream sm:text-sm"
+                          to={`/product/${result.product.slug}`}
+                          className="pressable inline-flex items-center justify-center gap-3 border-4 border-merry-cream/85 bg-transparent px-7 py-4 font-slab text-sm uppercase tracking-wide text-merry-cream hover:bg-merry-pine"
                         >
-                          Browse the full shelf
+                          Product details
+                          <HiArrowRight className="h-4 w-4" />
                         </Link>
                       </div>
+                      <Link
+                        to="/shop"
+                        className="mt-5 inline-flex items-center gap-2 border-b-2 border-merry-cream/60 pb-1 font-slab text-xs uppercase tracking-widest2 text-merry-cream/85 transition-colors hover:border-merry-cream hover:text-merry-cream sm:text-sm"
+                      >
+                        Browse the full shelf
+                      </Link>
                     </div>
                   </div>
                 </motion.div>

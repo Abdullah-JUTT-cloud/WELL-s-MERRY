@@ -18,7 +18,7 @@ const LINK_COLUMNS = [
       { label: "Hair Care Oil", to: "/shop" },
       { label: "All Products", to: "/shop" },
       { label: "The Hair Quiz", to: "/quiz" },
-      { label: "Track Order", to: "/orders" },
+      { label: "Track Order", to: "/account/orders" },
       { label: "Cart", to: "/cart" },
     ],
   },
