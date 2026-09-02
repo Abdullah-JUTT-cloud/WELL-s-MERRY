@@ -329,3 +329,96 @@
     scroll-snap-align: center;
   }
 }
+
+/* ==========================================================
+   APOCALYPSE THEME — raw texture utilities
+   Grain, halftone, newsprint columns, tape and outline type
+   used by the src/components/apocalypse/* sections.
+   ========================================================== */
+
+/* Film-grain overlay. Applied to a relatively-positioned section;
+   the pseudo element sits above content at very low opacity so text
+   and imagery both pick up the same raw paper grain. */
+.apoc-noise {
+  position: relative;
+  isolation: isolate;
+}
+.apoc-noise::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+  opacity: var(--apoc-noise-o, 0.16);
+  mix-blend-mode: var(--apoc-noise-blend, multiply);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/></svg>");
+  background-size: 240px 240px;
+}
+/* On dark surfaces, multiply grain disappears — screen it instead */
+.apoc-noise-dark {
+  --apoc-noise-blend: screen;
+  --apoc-noise-o: 0.07;
+}
+
+/* Halftone dot field — newspaper print texture. Color follows
+   `currentColor`, so set a text-* class + opacity on the element. */
+.apoc-halftone {
+  background-image: radial-gradient(currentColor 1.15px, transparent 1.3px);
+  background-size: 9px 9px;
+}
+
+/* Two-column newspaper body text with a hairline column rule */
+.apoc-newsprint {
+  column-count: 2;
+  column-gap: 16px;
+  column-rule: 1px solid rgba(15, 12, 9, 0.28);
+}
+
+/* Translucent tape strip for polaroids / clippings.
+   Centering is baked into the transform so it composes with the rotation
+   (a Tailwind -translate-x-1/2 class would be overridden by this rule).
+   Rotate via inline style: style={{ '--tape-rot': '-8deg' }} */
+.apoc-tape {
+  position: absolute;
+  width: 88px;
+  height: 26px;
+  background: rgba(242, 235, 220, 0.72);
+  box-shadow: 0 2px 5px rgba(15, 12, 9, 0.28);
+  transform: translateX(-50%) rotate(var(--tape-rot, -6deg));
+  border-left: 1px dashed rgba(15, 12, 9, 0.18);
+  border-right: 1px dashed rgba(15, 12, 9, 0.18);
+}
+
+/* Hollow display type — outline-only headline words */
+.apoc-outline {
+  -webkit-text-stroke: 2.5px currentColor;
+  color: transparent;
+}
+@media (max-width: 640px) {
+  .apoc-outline {
+    -webkit-text-stroke-width: 1.6px;
+  }
+}
+
+/* Marquee host bands are allowed to bleed past the viewport edge */
+.apoc-bleed {
+  width: 104vw;
+  margin-left: -2vw;
+}
+
+/* Hide scrollbars on horizontal carousels (product slider) while keeping
+   native scroll/drag behaviour intact. */
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* Rotated marquee bands bleed past the viewport on purpose.
+   `clip` (not `hidden`) prevents a horizontal scrollbar WITHOUT turning
+   the body into a scroll container, so position: sticky keeps working. */
+body {
+  overflow-x: clip;
+}

@@ -9,7 +9,7 @@ import {
 } from "react-icons/hi2";
 import { useCart } from "../context/CartContext.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
-import logo from "../assets/upnav.jpg";
+import { DropIcon } from "./apocalypse/icons.jsx";
 
 const NAV_LINKS = [
   { label: "Home", to: "/" },
@@ -31,7 +31,6 @@ const Header = () => {
   const accountRef = useRef(null);
   const headerRef = useRef(null);
 
-  const transparentNav = pathname === "/" && !scrolled;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -90,20 +89,19 @@ const Header = () => {
   }, []);
 
   const navLinkClass = ({ isActive }) =>
-    `relative py-1 text-[11.5px] tracking-[0.16em] uppercase font-semibold transition-colors
-     after:content-[''] after:absolute after:left-0 after:-bottom-1 after:h-[1.5px] after:bg-gold-2
-     after:transition-all after:duration-300
+    `relative py-1 font-grotesk text-[11.5px] tracking-[0.16em] uppercase font-extrabold transition-colors
+     after:content-[''] after:absolute after:left-0 after:-bottom-1 after:h-[3px] after:bg-apoc-ember
+     after:transition-all after:duration-200
      ${isActive
-       ? "text-gold-3 after:w-full"
-       : "text-cream/90 hover:text-gold-3 after:w-0 hover:after:w-full [text-shadow:0_1px_10px_rgba(0,0,0,0.75)]"}`;
+       ? "text-apoc-flame after:w-full"
+       : "text-apoc-bone hover:text-apoc-flame after:w-0 hover:after:w-full"}`;
 
-  const iconTextClass =
-    "text-cream/90 hover:text-gold-3 [filter:drop-shadow(0_1px_6px_rgba(0,0,0,0.85))]";
+  const iconTextClass = "text-apoc-bone hover:text-apoc-flame";
 
   return (
     <header ref={headerRef} className="sticky top-0 z-50 w-full">
       {/* Announcement bar */}
-      <div className="bg-white text-black text-[10px] sm:text-[11px] font-bold tracking-[0.14em] uppercase py-1.5 overflow-hidden border-b border-white/20 select-none whitespace-nowrap">
+      <div className="bg-apoc-ember text-apoc-soot text-[10px] sm:text-[11px] font-black tracking-[0.14em] uppercase py-1.5 overflow-hidden border-b-2 border-apoc-soot select-none whitespace-nowrap">
         <div className="flex w-max animate-marquee">
           {[...Array(6)].map((_, i) => (
             <div key={i} className="flex shrink-0 items-center">
@@ -111,11 +109,11 @@ const Header = () => {
                 <span>YOUR SIGNATURE ORGANIC CARE — NOW IN 200ML.</span>
                 <span className="ml-1.5 underline font-black">SHOP NOW</span>
               </Link>
-              <span className="text-gold-1 px-2.5">▪</span>
+              <span className="px-2.5">☠</span>
               <span className="px-3 sm:px-4">FREE SHIPPING ON ORDERS OVER RS. 3000</span>
-              <span className="text-gold-1 px-2.5">▪</span>
+              <span className="px-2.5">☠</span>
               <span className="px-3 sm:px-4 font-black">100% ORGANIC &amp; CHEMICAL FREE</span>
-              <span className="text-gold-1 px-2.5">▪</span>
+              <span className="px-2.5">☠</span>
             </div>
           ))}
         </div>
@@ -127,8 +125,8 @@ const Header = () => {
           shifting every hero offset by a few pixels mid-scroll. Only the
           background and shadow react to scrolling now. */}
       <div
-        className={`py-2.5 shadow-none transition-colors duration-300 ${
-          transparentNav ? "bg-transparent" : "bg-ink"
+        className={`py-2.5 bg-apoc-soot border-b-4 border-apoc-ember transition-shadow duration-300 ${
+          scrolled ? "shadow-[0_6px_0_rgba(15,12,9,0.45)]" : "shadow-none"
         }`}
       >
         <div className="container-content flex items-center justify-between gap-2 px-4 sm:px-6">
@@ -155,12 +153,23 @@ const Header = () => {
 
           {/* Logo — center */}
           <div className="flex justify-center items-center shrink-0">
-            <Link to="/" onClick={() => setMobileOpen(false)}>
-              <img
-                src={logo}
-                alt="Well's Merry"
-                className="h-9 sm:h-11 lg:h-14 w-auto object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.65)] transition-transform duration-300 hover:scale-105"
-              />
+            <Link
+              to="/"
+              onClick={() => setMobileOpen(false)}
+              className="flex items-center gap-2.5 group"
+              aria-label="Well's Merry — home"
+            >
+              <span className="w-9 h-9 sm:w-11 sm:h-11 bg-apoc-ember border-[3px] border-apoc-bone flex items-center justify-center shadow-hard-ember group-hover:rotate-[-6deg] transition-transform">
+                <DropIcon className="w-5 h-5 sm:w-6 sm:h-6 text-apoc-soot" />
+              </span>
+              <span className="leading-none text-left">
+                <span className="block font-apoc uppercase text-apoc-bone text-sm sm:text-lg tracking-tight">
+                  Well&apos;s Merry
+                </span>
+                <span className="block font-grotesk font-bold text-[8px] sm:text-[9px] uppercase tracking-[0.28em] text-apoc-flame mt-0.5">
+                  End of bad haircare
+                </span>
+              </span>
             </Link>
           </div>
 
@@ -187,26 +196,26 @@ const Header = () => {
               </button>
 
               {accountOpen && (
-                <div className="absolute right-0 mt-3 w-52 bg-ivory border border-cream-dim rounded-lg shadow-soft py-2 animate-[fadeIn_0.15s_ease-out] z-50">
+                <div className="absolute right-0 mt-3 w-52 bg-apoc-bone border-4 border-apoc-soot shadow-hard-ember py-2 animate-[fadeIn_0.15s_ease-out] z-50">
                   {authLoading ? (
-                    <div className="px-4 py-3 text-sm text-ink/50">Loading…</div>
+                    <div className="px-4 py-3 text-sm text-apoc-soot/50">Loading…</div>
                   ) : isAuthenticated ? (
                     <>
-                      <div className="px-4 py-2.5 border-b border-cream-dim">
-                        <p className="text-sm font-semibold text-ink truncate">{user.name}</p>
-                        <p className="text-xs text-ink/50 truncate">{user.email}</p>
+                      <div className="px-4 py-2.5 border-b border-apoc-soot/20">
+                        <p className="text-sm font-semibold text-apoc-soot truncate">{user.name}</p>
+                        <p className="text-xs text-apoc-soot/50 truncate">{user.email}</p>
                       </div>
                       <Link
                         to="/account/orders"
                         onClick={() => setAccountOpen(false)}
-                        className="flex items-center gap-2 px-4 py-2.5 text-sm text-ink/80 hover:bg-cream hover:text-ink font-medium"
+                        className="flex items-center gap-2 px-4 py-2.5 text-sm text-apoc-soot/80 hover:bg-apoc-paper hover:text-apoc-soot font-medium"
                       >
-                        <HiOutlineTruck className="w-4 h-4 text-gold-1" />
+                        <HiOutlineTruck className="w-4 h-4 text-apoc-rust" />
                         My Orders / Track
                       </Link>
                       <button
                         onClick={() => { logout(); setAccountOpen(false); }}
-                        className="w-full text-left px-4 py-2.5 text-sm text-ink/80 hover:bg-cream hover:text-ink font-medium"
+                        className="w-full text-left px-4 py-2.5 text-sm text-apoc-soot/80 hover:bg-apoc-paper hover:text-apoc-soot font-medium"
                       >
                         Log Out
                       </button>
@@ -216,24 +225,24 @@ const Header = () => {
                       <Link
                         to="/login"
                         onClick={() => setAccountOpen(false)}
-                        className="block px-4 py-2.5 text-sm text-ink/80 hover:bg-cream hover:text-ink font-medium"
+                        className="block px-4 py-2.5 text-sm text-apoc-soot/80 hover:bg-apoc-paper hover:text-apoc-soot font-medium"
                       >
                         Log In
                       </Link>
                       <Link
                         to="/register"
                         onClick={() => setAccountOpen(false)}
-                        className="block px-4 py-2.5 text-sm text-ink/80 hover:bg-cream hover:text-ink font-medium"
+                        className="block px-4 py-2.5 text-sm text-apoc-soot/80 hover:bg-apoc-paper hover:text-apoc-soot font-medium"
                       >
                         Create Account
                       </Link>
-                      <div className="border-t border-cream-dim mt-1 pt-1">
+                      <div className="border-t border-apoc-soot/20 mt-1 pt-1">
                         <Link
                           to="/account/orders"
                           onClick={() => setAccountOpen(false)}
-                          className="flex items-center gap-2 px-4 py-2.5 text-sm text-ink/80 hover:bg-cream hover:text-ink font-medium"
+                          className="flex items-center gap-2 px-4 py-2.5 text-sm text-apoc-soot/80 hover:bg-apoc-paper hover:text-apoc-soot font-medium"
                         >
-                          <HiOutlineTruck className="w-4 h-4 text-gold-1" />
+                          <HiOutlineTruck className="w-4 h-4 text-apoc-rust" />
                           Track Order
                         </Link>
                       </div>
@@ -251,7 +260,7 @@ const Header = () => {
             >
               <HiOutlineShoppingBag className="w-5 h-5 sm:w-[22px] sm:h-[22px]" />
               {itemCount > 0 && (
-                <span className="absolute -top-1 -right-1.5 w-[18px] h-[18px] rounded-full bg-gold-2 text-ink text-[10px] font-bold flex items-center justify-center shadow-sm">
+                <span className="absolute -top-1 -right-1.5 w-[18px] h-[18px] rounded-full bg-apoc-ember text-apoc-soot text-[10px] font-black flex items-center justify-center border border-apoc-soot">
                   {itemCount > 9 ? "9+" : itemCount}
                 </span>
               )}
@@ -273,13 +282,13 @@ const Header = () => {
           onClick={() => setMobileOpen(false)}
         />
         <div
-          className={`absolute left-0 top-0 h-full w-[82%] max-w-xs bg-ink border-r border-gold-2/20
+          className={`absolute left-0 top-0 h-full w-[82%] max-w-xs bg-apoc-coal border-r-4 border-apoc-ember
                       transition-transform duration-300 ease-out flex flex-col z-10
                       ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}
         >
-          <div className="flex items-center justify-between px-5 py-4 border-b border-gold-2/15 bg-black/40">
-            <img src={logo} alt="Well's Merry" className="h-9 w-auto object-contain" />
-            <button aria-label="Close menu" onClick={() => setMobileOpen(false)} className="text-cream p-1">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-apoc-bone/15 bg-apoc-soot">
+            <span className="font-apoc uppercase text-apoc-bone text-base tracking-tight">Well&apos;s Merry</span>
+            <button aria-label="Close menu" onClick={() => setMobileOpen(false)} className="text-apoc-bone p-1">
               <HiXMark className="w-6 h-6" />
             </button>
           </div>
@@ -292,8 +301,8 @@ const Header = () => {
                 end={link.to === "/"}
                 onClick={() => setMobileOpen(false)}
                 className={({ isActive }) =>
-                  `py-3.5 border-b border-gold-2/10 text-[13px] tracking-[0.14em] uppercase font-semibold ${
-                    isActive ? "text-gold-3" : "text-cream/85 hover:text-gold-3"
+                  `py-3.5 border-b border-apoc-bone/10 font-grotesk text-[13px] tracking-[0.14em] uppercase font-extrabold ${
+                    isActive ? "text-apoc-flame" : "text-apoc-bone/85 hover:text-apoc-flame"
                   }`
                 }
               >
@@ -304,35 +313,35 @@ const Header = () => {
             <Link
               to="/account/orders"
               onClick={() => setMobileOpen(false)}
-              className="py-3.5 border-b border-gold-2/10 text-[13px] tracking-[0.14em] uppercase font-semibold text-cream/85 hover:text-gold-3 flex items-center gap-2"
+              className="py-3.5 border-b border-apoc-bone/10 text-[13px] tracking-[0.14em] uppercase font-extrabold text-apoc-bone/85 hover:text-apoc-flame flex items-center gap-2"
             >
-              <HiOutlineTruck className="w-4 h-4 text-gold-2" />
+              <HiOutlineTruck className="w-4 h-4 text-apoc-ember" />
               Track Order
             </Link>
             <Link
               to="/cart"
               onClick={() => setMobileOpen(false)}
-              className="py-3.5 border-b border-gold-2/10 text-[13px] tracking-[0.14em] uppercase font-semibold text-cream/85 hover:text-gold-3 flex items-center gap-2"
+              className="py-3.5 border-b border-apoc-bone/10 text-[13px] tracking-[0.14em] uppercase font-extrabold text-apoc-bone/85 hover:text-apoc-flame flex items-center gap-2"
             >
-              <HiOutlineShoppingBag className="w-4 h-4 text-gold-2" />
-              Cart {itemCount > 0 && <span className="ml-1 bg-gold-2 text-ink text-[10px] font-bold px-1.5 py-0.5 rounded-full">{itemCount}</span>}
+              <HiOutlineShoppingBag className="w-4 h-4 text-apoc-ember" />
+              Cart {itemCount > 0 && <span className="ml-1 bg-apoc-ember text-apoc-soot text-[10px] font-black px-1.5 py-0.5 rounded-full">{itemCount}</span>}
             </Link>
             <Link
               to="/shipping"
               onClick={() => setMobileOpen(false)}
-              className="py-3.5 border-b border-gold-2/10 text-[13px] tracking-[0.14em] uppercase font-semibold text-cream/85 hover:text-gold-3"
+              className="py-3.5 border-b border-apoc-bone/10 text-[13px] tracking-[0.14em] uppercase font-extrabold text-apoc-bone/85 hover:text-apoc-flame"
             >
               Shipping &amp; Returns
             </Link>
           </nav>
 
-          <div className="px-5 py-6 border-t border-gold-2/15 bg-black/40">
+          <div className="px-5 py-6 border-t border-apoc-bone/15 bg-apoc-soot">
             {isAuthenticated ? (
               <div className="space-y-3">
-                <p className="text-xs text-cream/50 truncate">{user?.email}</p>
+                <p className="text-xs text-apoc-bone/50 truncate">{user?.email}</p>
                 <button
                   onClick={() => { logout(); setMobileOpen(false); }}
-                  className="w-full border border-gold-2/40 text-gold-3 font-semibold uppercase text-xs tracking-wider py-3 rounded-lg hover:bg-gold-2 hover:text-ink transition"
+                  className="w-full border-2 border-apoc-ember text-apoc-flame font-black uppercase text-xs tracking-wider py-3 hover:bg-apoc-ember hover:text-apoc-soot transition"
                 >
                   Log Out
                 </button>
@@ -341,7 +350,7 @@ const Header = () => {
               <Link
                 to="/login"
                 onClick={() => setMobileOpen(false)}
-                className="block w-full bg-gold-2 text-ink font-bold uppercase text-xs tracking-wider py-3 rounded-lg text-center shadow-md hover:bg-gold-3 transition"
+                className="block w-full bg-apoc-ember text-apoc-soot font-black uppercase text-xs tracking-wider py-3 text-center border-2 border-apoc-soot shadow-hard-ink hover:bg-apoc-flame transition"
               >
                 Log In / Register
               </Link>
