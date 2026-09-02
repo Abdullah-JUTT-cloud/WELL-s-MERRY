@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { motion, useReducedMotion } from "framer-motion";
-import { APOC_PRODUCTS, HERO_BOTTLES } from "../../data/apocalypse/products.js";
+import { useProducts } from "../../hooks/useProducts.js";
 import StampBadge from "./StampBadge.jsx";
 import { DropIcon, SkullIcon, FlameIcon } from "./icons.jsx";
 
@@ -9,9 +9,22 @@ import { DropIcon, SkullIcon, FlameIcon } from "./icons.jsx";
    Left: oversized aggressive stacked typography.
    Right: 3–4 product bottles stamped onto the page at hard angles,
    overlapping sticker frames + rotating circular geographic badges.
+
+   The bottles are the first products in the live catalogue, not a
+   hardcoded set: this hero used to look products up by invented ids
+   ("wm-last-hair-oil") that match no document in Mongo.
    ===================================================================== */
 
-const byId = (id) => APOC_PRODUCTS.find((p) => p._id === id);
+/* Hero composition — where each bottle gets stamped onto the canvas.
+   Positions/rotations are percentages of the hero visual canvas; the
+   bottle in each slot is whatever the catalogue returns, in order, so a
+   new admin product shows up here without a code change. */
+const HERO_SLOTS = [
+  { x: 6, y: 4, w: 47, rot: -6, z: 2, delay: 0.15 },
+  { x: 48, y: 0, w: 42, rot: 5, z: 1, delay: 0.3 },
+  { x: 0, y: 46, w: 40, rot: 4, z: 3, delay: 0.45 },
+  { x: 42, y: 40, w: 46, rot: -4, z: 4, delay: 0.6 },
+];
 
 const HEADLINE = [
   { text: "IT'S THE END", cls: "text-apoc-soot" },
@@ -21,6 +34,7 @@ const HEADLINE = [
 
 const HeroApocalypse = () => {
   const reduce = useReducedMotion();
+  const { products } = useProducts();
 
   return (
     <section className="relative bg-apoc-bone text-apoc-soot apoc-noise overflow-hidden">
@@ -127,12 +141,12 @@ const HeroApocalypse = () => {
           {/* ================= RIGHT — STAMPED BOTTLES ================= */}
           <div className="lg:col-span-5 relative z-10">
             <div className="relative h-[420px] sm:h-[520px] lg:h-[600px]">
-              {HERO_BOTTLES.map((slot) => {
-                const product = byId(slot.id);
+              {HERO_SLOTS.map((slot, i) => {
+                const product = products[i];
                 if (!product) return null;
                 return (
                   <motion.div
-                    key={slot.id}
+                    key={product._id}
                     className="absolute"
                     style={{
                       left: `${slot.x}%`,
@@ -154,7 +168,7 @@ const HeroApocalypse = () => {
                         className="bg-apoc-bone border-4 border-apoc-soot shadow-hard-ink p-2 sm:p-3"
                       >
                         <img
-                          src={product.image}
+                          src={product.images?.[0]}
                           alt={product.name}
                           className="w-full aspect-[3/4] object-cover border-2 border-apoc-soot/20"
                           draggable={false}

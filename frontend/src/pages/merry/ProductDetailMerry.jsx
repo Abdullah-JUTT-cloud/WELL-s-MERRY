@@ -14,7 +14,7 @@ import { FaWhatsapp } from "react-icons/fa";
 import { getProductBySlug } from "../../api/products.js";
 import { buildWhatsAppLink } from "../../config/siteConfig.js";
 import { useCart } from "../../context/CartContext.jsx";
-import { MERRY_PRODUCTS } from "../../data/merry/mock.js";
+import { useProducts } from "../../hooks/useProducts.js";
 import {
   MagneticProductCard,
   LeafIcon,
@@ -99,6 +99,12 @@ const ProductDetail = () => {
   const { slug } = useParams();
   const { addItem } = useCart();
 
+  /* Live catalogue for the "Pairs well with" strip. Fetched once (all
+     categories, filtered below) rather than per-category, so opening a PDP
+     costs one request instead of two. Must be called before the early
+     returns below — React hooks can't be conditional. */
+  const { products: catalogue } = useProducts();
+
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -170,9 +176,12 @@ const ProductDetail = () => {
   const selectedSize = sizeOptions[Math.min(sizeIdx, sizeOptions.length - 1)];
   const outOfStock = product.stock === 0;
 
-  const related = MERRY_PRODUCTS.filter(
-    (p) => p.category === product.category && p.slug !== product.slug
-  ).slice(0, 3);
+  // Same-category suggestions from the live catalogue — never the current
+  // product, and never a hardcoded list (a related card is one click from
+  // "add to cart", so every id here has to be a real MongoDB _id).
+  const related = catalogue
+    .filter((p) => p.category === product.category && p._id !== product._id)
+    .slice(0, 3);
 
   const whatsappOrder = () => {
     const message = `Hi Well's Merry! I'd like to order:\n\n${qty} x ${product.name} (${selectedSize.label}) - Rs.${(

@@ -4,6 +4,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { HiArrowLeft, HiArrowRight, HiCheck, HiOutlineShoppingBag } from "react-icons/hi2";
 import { LeafIcon, SparkIcon, BottleIcon } from "../../components/merry/index.js";
 import { useCart } from "../../context/CartContext.jsx";
+import { useProducts } from "../../hooks/useProducts.js";
 import { MERRY_QUIZ_STEPS, recommend } from "../../data/merry/mock.js";
 
 /* =====================================================================
@@ -12,8 +13,9 @@ import { MERRY_QUIZ_STEPS, recommend } from "../../data/merry/mock.js";
    • Forest-green stage, thick cream progress rail, step counter.
    • Chunky toggle buttons: select one and the form glides to the next
      question on its own (direction-aware slide, AnimatePresence).
-   • Result screen: recommended product from the mock catalog, a
-     personalised ritual, add-to-cart straight into the drawer.
+   • Result screen: the recommended bottle comes from the live catalogue
+     (GET /api/products), so "Add to cart" puts a real MongoDB _id in the
+     cart — a mock id here is an order that 404s at checkout.
    ===================================================================== */
 
 const STEP_SPRING = { type: "spring", stiffness: 260, damping: 28 };
@@ -32,10 +34,18 @@ const Quiz = () => {
   const dir = useRef(1);
   const advancing = useRef(false);
 
+  // Fetched up front (not on the result screen) so the catalogue is already
+  // in memory by the time the shopper finishes the last question — the
+  // recommendation never flashes empty.
+  const { products, loading: loadingProducts } = useProducts();
+
   const total = MERRY_QUIZ_STEPS.length;
   const done = stepIndex >= total;
   const step = MERRY_QUIZ_STEPS[Math.min(stepIndex, total - 1)];
-  const result = useMemo(() => (done ? recommend(answers) : null), [done, answers]);
+  const result = useMemo(
+    () => (done ? recommend(answers, products) : null),
+    [done, answers, products]
+  );
 
   const pick = (value) => {
     if (advancing.current) return;
@@ -205,14 +215,18 @@ const Quiz = () => {
                   <div className="mt-10 grid gap-6 sm:grid-cols-[minmax(0,240px)_1fr] sm:gap-8">
                     <div className="border-4 border-merry-cream bg-merry-cream shadow-hard-merry-cream">
                       <img
-                        src={result.product.images[0]}
-                        alt={result.product.name}
+                        src={result.product?.images?.[0]}
+                        alt={result.product?.name || "Your match"}
                         className="aspect-[4/5] w-full object-cover"
                       />
                       <div className="flex items-center justify-between border-t-4 border-merry-forest px-4 py-3 text-merry-forest">
-                        <span className="font-slab text-lg">{result.product.name}</span>
+                        <span className="font-slab text-lg">
+                          {result.product?.name || "Loading our shelf…"}
+                        </span>
                         <span className="font-slab text-lg text-merry-clay-deep">
-                          Rs. {result.product.price.toLocaleString()}
+                          {result.product
+                            ? `Rs. ${Number(result.product.price).toLocaleString()}`
+                            : "—"}
                         </span>
                       </div>
                     </div>
@@ -236,17 +250,36 @@ const Quiz = () => {
                         {result.sizeNote}
                       </p>
 
+                      {/* The ritual lines are built around the recommended
+                          bottle; with nothing on the shelf say so plainly
+                          rather than rendering a numbered list of nothing. */}
+                      {!result.product && (
+                        <p className="mt-4 text-sm font-medium text-merry-cream/70">
+                          {loadingProducts
+                            ? "Checking what's on the shelf…"
+                            : "Our shelf is between batches right now — the shop has the latest."}
+                        </p>
+                      )}
+
                       <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+                        {/* No product yet = nothing to add. Disabling beats
+                            calling addItem(undefined) and pushing a cart line
+                            with no id, which is unorderable at checkout. */}
                         <button
                           type="button"
-                          onClick={() => addItem(result.product, 1)}
-                          className="pressable inline-flex items-center justify-center gap-3 border-4 border-merry-cream bg-merry-clay px-7 py-4 font-slab text-base uppercase tracking-wide text-merry-cream shadow-hard-merry-cream"
+                          disabled={!result.product}
+                          onClick={() => result.product && addItem(result.product, 1)}
+                          className="pressable inline-flex items-center justify-center gap-3 border-4 border-merry-cream bg-merry-clay px-7 py-4 font-slab text-base uppercase tracking-wide text-merry-cream shadow-hard-merry-cream disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           <HiOutlineShoppingBag className="h-5 w-5" />
                           Add to cart
                         </button>
                         <Link
-                          to={`/product/${result.product.slug}`}
+                          to={
+                            result.product
+                              ? `/product/${result.product.slug}`
+                              : "/shop"
+                          }
                           className="pressable inline-flex items-center justify-center gap-3 border-4 border-merry-cream/85 bg-transparent px-7 py-4 font-slab text-sm uppercase tracking-wide text-merry-cream hover:bg-merry-pine"
                         >
                           Product details

@@ -2,9 +2,15 @@ import mongoose from "mongoose";
 
 const orderItemSchema = new mongoose.Schema(
   {
+    // The real MongoDB ObjectId of the Product, copied from the document the
+    // controller just re-fetched (never from the request body). This is the
+    // join key for reviews and for restoring stock when an order is cancelled.
     product: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
     name: { type: String, required: true },
-    image: { type: String, required: true },
+    // Snapshot of the first image at purchase time. Not required: an admin can
+    // save a product with no image yet, and a missing thumbnail must not block
+    // a customer from buying it (it used to reject the order with a 500).
+    image: { type: String, default: "" },
     price: { type: Number, required: true },
     size: { type: String },
     qty: { type: Number, required: true, min: 1 },

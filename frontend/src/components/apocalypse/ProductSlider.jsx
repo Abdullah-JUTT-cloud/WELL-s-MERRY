@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { APOC_PRODUCTS } from "../../data/apocalypse/products.js";
 import { useCart } from "../../context/CartContext.jsx";
+import { useProducts } from "../../hooks/useProducts.js";
 import { DropIcon } from "./icons.jsx";
 
 /* =====================================================================
@@ -9,6 +9,11 @@ import { DropIcon } from "./icons.jsx";
    Hover: the bottle springs up and out of its window while an ember
    size-select / QUICK ADD panel slams up from the card's bottom edge.
    Tap (touch devices) toggles the same state via onClick.
+
+   The bottles come from GET /api/products, like every other catalog
+   surface. The old `APOC_PRODUCTS` array invented ids (and a
+   `${_id}-${size}` composite on quick-add) that matched no document in
+   Mongo, so anything added from here died at checkout.
    ===================================================================== */
 
 const ACCENTS = {
@@ -18,15 +23,46 @@ const ACCENTS = {
   volt: "bg-apoc-volt",
 };
 
+/* Cycled per card: the sticker colours are decoration, so there's no need
+   to store them against the product. */
+const ACCENT_CYCLE = ["ember", "rust", "flame", "volt"];
+
+/**
+ * Shape a live Product document for the card below.
+ *
+ * Only the presentation is invented here (uppercase name, tilt, accent,
+ * a tag when the product has no badge). The `_id` is passed through
+ * untouched — it is the MongoDB ObjectId the checkout will look up.
+ */
+const toSliderProduct = (p, index = 0) => {
+  const label = p.size || "200ml";
+  return {
+    _id: p._id,
+    slug: p.slug,
+    name: (p.name || "Hair oil").toUpperCase(),
+    subtitle: p.shortDescription || (p.category || "").replace(/-/g, " ") || "Cold-pressed",
+    blurb: p.shortDescription || p.description || "",
+    tag: (p.badge || (p.isFeatured ? "BEST SELLER" : "SMALL BATCH")).toUpperCase(),
+    accent: ACCENT_CYCLE[index % ACCENT_CYCLE.length],
+    tilt: index % 2 ? 2 : -2,
+    image: p.images?.[0],
+    sizes: p.sizes?.length ? p.sizes : [{ label, price: p.price }],
+    stock: p.stock ?? 0,
+  };
+};
+
 const SliderCard = ({ product, onAdd }) => {
   const reduce = useReducedMotion();
   const [open, setOpen] = useState(false);
   const [sizeIdx, setSizeIdx] = useState(0);
-  const size = product.sizes[sizeIdx] ?? product.sizes[0];
+  const size =
+    product.sizes?.[sizeIdx] ?? product.sizes?.[0] ?? { label: "—", price: 0 };
 
   const handleAdd = () => {
+    // `product._id` verbatim: the cart line has to carry the id Mongo
+    // knows, or POST /api/orders has nothing to look up.
     onAdd({
-      _id: `${product._id}-${size.label}`,
+      _id: product._id,
       slug: product.slug,
       name: product.name,
       images: [product.image],
@@ -144,9 +180,13 @@ const SliderCard = ({ product, onAdd }) => {
   );
 };
 
-const ProductSlider = ({ products = APOC_PRODUCTS }) => {
+const ProductSlider = () => {
   const scroller = useRef(null);
   const { addItem } = useCart();
+  const { products: inventory, loading } = useProducts();
+
+  // Mapped (not fetched) here so the id survives the trip into the card.
+  const products = inventory.map(toSliderProduct);
 
   const nudge = (dir) => {
     const el = scroller.current;
@@ -203,9 +243,30 @@ const ProductSlider = ({ products = APOC_PRODUCTS }) => {
         className="overflow-x-auto snap-x snap-mandatory pb-14 pt-16 scrollbar-none"
       >
         <div className="flex gap-6 px-4 sm:px-8 w-max">
-          {products.map((p) => (
-            <SliderCard key={p._id} product={p} onAdd={addItem} />
-          ))}
+          {loading ? (
+            /* Three placeholder blocks keep the track's height stable
+               while the real bottles load. */
+            Array.from({ length: 3 }).map((_, i) => (
+              <div
+                key={i}
+                aria-hidden="true"
+                className="skeleton skeleton-dark shrink-0 w-[280px] sm:w-[330px] h-[420px] border-4 border-apoc-bone/30"
+              />
+            ))
+          ) : products.length === 0 ? (
+            <div className="shrink-0 w-[280px] sm:w-[420px] border-4 border-dashed border-apoc-bone/40 flex flex-col items-center justify-center gap-3 p-8 text-center">
+              <p className="font-apoc uppercase text-2xl leading-tight">
+                New batches
+                <br />
+                <span className="text-apoc-ember">coming soon...</span>
+              </p>
+              <p className="font-grotesk font-semibold text-xs uppercase tracking-[0.14em] text-apoc-bone/50">
+                The press is cold. The shelf refills soon.
+              </p>
+            </div>
+          ) : (
+            products.map((p) => <SliderCard key={p._id} product={p} onAdd={addItem} />)
+          )}
           {/* End cap */}
           <div className="shrink-0 w-[220px] sm:w-[260px] snap-center border-4 border-dashed border-apoc-bone/40 flex flex-col items-center justify-center gap-4 p-6 text-center">
             <DropIcon className="w-10 h-10 text-apoc-ember" />

@@ -137,6 +137,18 @@ const Checkout = () => {
 
   const validate = () => {
     const next = {};
+
+    // A cart line whose id isn't an ObjectId can't be looked up server-side —
+    // it's a leftover from the old hardcoded catalogue. Fail here, with
+    // something the shopper can act on, instead of 404ing once the address
+    // is filled in.
+    const stale = items.filter((i) => !/^[0-9a-fA-F]{24}$/.test(i.productId || ""));
+    if (stale.length) {
+      next.cart = `${stale.length === 1 ? "One item is" : "Some items are"} no longer sold. Please remove ${
+        stale.length === 1 ? "it" : "them"
+      } and add the current bottles from the shop.`;
+    }
+
     if (!form.fullName.trim()) next.fullName = "Full name is required";
     if (!form.phone.trim()) next.phone = "Phone number is required";
     else if (!/^[\d+\s-]{7,15}$/.test(form.phone.trim())) next.phone = "Enter a valid phone number";
@@ -159,6 +171,9 @@ const Checkout = () => {
     return Object.keys(next).length === 0;
   };
 
+  // Each line carries the product's MongoDB _id (stored on the cart item as
+  // `productId` by CartContext) and nothing else — the server re-reads
+  // price, name and image from the database rather than trusting this.
   const buildOrderItems = () =>
     items.map((i) => ({ product: i.productId, qty: i.qty }));
 
@@ -423,6 +438,15 @@ const Checkout = () => {
             <span>Total</span>
             <span>Rs.{subtotal.toLocaleString()}</span>
           </div>
+
+          {errors.cart && (
+            <p
+              role="alert"
+              className="mb-5 border-l-4 border-red-400 bg-red-50 px-4 py-3 text-[13px] leading-relaxed text-red-700"
+            >
+              {errors.cart}
+            </p>
+          )}
 
           <button type="submit" disabled={submitting} className="btn btn-dark w-full">
             {submitting

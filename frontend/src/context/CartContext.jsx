@@ -18,11 +18,38 @@ const STORAGE_KEY = "wm_cart_v1";
 // The price is always re-verified server-side at checkout anyway (see
 // orderController.js), so a stale snapshot here is a UX detail, not a
 // security concern.
+//
+// The ONE field that must never be a snapshot is `productId`: it is the
+// product's MongoDB _id, verbatim, because it is the only thing checkout
+// sends to the server (`POST /api/orders` → `Product.findById`). The shop
+// used to render a hardcoded catalogue whose ids ("merry-p1") existed in
+// no collection, so every order placed from it 404'd with "Resource not
+// found". Two guards below keep that from happening again:
+//
+//   1. addItem() refuses a product with no _id.
+//   2. loadInitialCart() drops lines whose id isn't an ObjectId — those are
+//      carts saved by the old mock build, and they can never be ordered.
+
+/** A 24-char hex string — what MongoDB hands out for every document. */
+const isObjectId = (id) => typeof id === "string" && /^[0-9a-fA-F]{24}$/.test(id);
 
 const loadInitialCart = () => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
+    const parsed = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(parsed)) return [];
+
+    // Purge stale lines left over from the hardcoded catalogue. They are
+    // unorderable by definition, so keeping them would only send the
+    // shopper to a checkout that fails on them.
+    const usable = parsed.filter((item) => isObjectId(item?.productId));
+    if (usable.length !== parsed.length) {
+      console.warn(
+        `[cart] Dropped ${parsed.length - usable.length} item(s) with ids that ` +
+          "aren't in our catalogue — they were saved by an older version of the shop."
+      );
+    }
+    return usable;
   } catch {
     return []; // corrupted/blocked storage — fail safe to an empty cart, not a crash
   }
@@ -95,8 +122,17 @@ export const CartProvider = ({ children }) => {
   // e.g. add an item in Tab A, Tab B's cart badge updates without a refresh
   useEffect(() => {
     const handleStorage = (e) => {
-      if (e.key === STORAGE_KEY && e.newValue) {
-        dispatch({ type: "HYDRATE", payload: JSON.parse(e.newValue) });
+      if (e.key !== STORAGE_KEY || !e.newValue) return;
+      try {
+        const parsed = JSON.parse(e.newValue);
+        // Same purge as `loadInitialCart` — another tab could still be
+        // running an older build and write stale ids into shared storage.
+        const usable = Array.isArray(parsed)
+          ? parsed.filter((item) => isObjectId(item?.productId))
+          : [];
+        dispatch({ type: "HYDRATE", payload: usable });
+      } catch {
+        // A half-written value from another tab isn't worth crashing for.
       }
     };
     window.addEventListener("storage", handleStorage);
@@ -104,11 +140,25 @@ export const CartProvider = ({ children }) => {
   }, []);
 
   const addItem = (product, qty = 1) => {
+    // Guard rail, not paranoia: a cart line without a real MongoDB _id is a
+    // checkout that fails after the customer has filled in their address.
+    if (!isObjectId(product?._id)) {
+      console.error(
+        "[cart] Refused to add a product with no MongoDB _id — it could not be ordered.",
+        product
+      );
+      toast.error("This item isn't available to order yet. Please refresh the shop.");
+      return false;
+    }
+
     dispatch({
       type: "ADD_ITEM",
       payload: {
         qty,
         item: {
+          // The product's real _id — copied, never generated, never
+          // combined with a size or variant (a `${_id}-200ml` composite
+          // looks like an id and behaves like a 404).
           productId: product._id,
           slug: product.slug,
           name: product.name,
@@ -120,6 +170,7 @@ export const CartProvider = ({ children }) => {
       },
     });
     toast.success(`${product.name} added to cart`);
+    return true;
   };
 
   const removeItem = (productId) => {

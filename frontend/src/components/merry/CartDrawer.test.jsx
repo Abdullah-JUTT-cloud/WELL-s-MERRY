@@ -16,9 +16,11 @@ import MerryLayout from "./Layout.jsx";
    full cart" / "Checkout" navigated with the panel still on screen.
    ===================================================================== */
 
+/* A real 24-char ObjectId, because that's what a cart line holds now: the
+   product's MongoDB _id, which is what POST /api/orders looks up. */
 const ONE_ITEM = JSON.stringify([
   {
-    productId: "p-1",
+    productId: "64f1a2b3c4d5e6f7a8b9c0d1",
     slug: "hair-care-oil",
     name: "Organic Hair Care Oil",
     image: null,
