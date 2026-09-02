@@ -1,8 +1,13 @@
 import axios from "axios";
 import { getAccessToken, setAccessToken, clearAccessToken } from "./tokenStore.js";
+import { API_BASE_URL } from "./baseUrl.js";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
+  // Resolved by ./baseUrl.js — always ends in /api, and falls back to the
+  // live Render backend in a production build rather than to localhost.
+  // Requests here are written without the prefix ("/orders"), so a base URL
+  // of https://well-s-merry.onrender.com/api yields POST /api/orders.
+  baseURL: API_BASE_URL,
   withCredentials: true, // sends the httpOnly refreshToken cookie automatically
 });
 
@@ -34,6 +39,20 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+
+    // A 404 from our own error handler means the path never matched a route —
+    // almost always a base-URL/prefix mismatch rather than a missing record.
+    // Say so plainly instead of surfacing the raw server string.
+    if (error.response?.status === 404) {
+      const serverMessage = error.response.data?.message || "";
+      if (/route not found/i.test(serverMessage)) {
+        console.error(
+          `[api] No route for ${originalRequest?.method?.toUpperCase()} ${
+            originalRequest?.baseURL
+          }${originalRequest?.url} — check VITE_API_URL points at the API root (…/api).`
+        );
+      }
+    }
 
     // Never try to refresh in response to the login/refresh endpoints
     // themselves — that would create an infinite loop

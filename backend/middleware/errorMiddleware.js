@@ -9,10 +9,24 @@ export const notFound = (req, res, next) => {
 // (wrapped by express-async-handler) ends up here as clean JSON.
 export const errorHandler = (err, req, res, next) => {
   // If a controller set res.status(...) before throwing, keep it.
-  // Otherwise, default to 500 (unless Express already flagged 200, which means
-  // the error came from somewhere that never set a status).
-  let statusCode = res.statusCode === 200 ? 500 : res.statusCode;
+  // Otherwise fall back to whatever the error itself declares (body-parser
+  // sets 400 on malformed JSON, http-errors carries its own status) and only
+  // then to 500. Without the err.status branch a syntax error in the request
+  // body — the client's mistake — was reported as a server error.
+  let statusCode =
+    res.statusCode === 200 ? err.status || err.statusCode || 500 : res.statusCode;
   let message = err.message;
+
+  // Multer's upload errors (oversized receipt, too many review images) are
+  // client mistakes too, and they arrive with no status at all.
+  if (err.name === "MulterError") {
+    statusCode = 400;
+    if (err.code === "LIMIT_FILE_SIZE") {
+      message = "That file is too large. Please upload an image under 5MB.";
+    } else {
+      message = err.message || "There was a problem with the uploaded file.";
+    }
+  }
 
   // Mongoose bad ObjectId (e.g. malformed :id in a route param)
   if (err.name === "CastError" && err.kind === "ObjectId") {
