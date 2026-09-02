@@ -107,6 +107,15 @@ function App() {
           <Route element={<ProtectedRoute />}>
             <Route path="/account/orders" element={<Orders />} />
           </Route>
+
+          {/* Utility / transactional routes — previously registered under the
+              legacy gold Layout, which is what leaked the old black/orange
+              footer onto them. They are now universally wrapped by
+              MerryLayout, so Navbar + green/cream Footer + cart drawer are
+              inherited, never imported per-page. */}
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/order-confirmation/:id" element={<OrderConfirmation />} />
+          <Route path="/shipping" element={<Shipping />} />
         </Route>
 
         {/* Auth — full-screen 50/50 split (AuthLayout owns its own chrome,
@@ -124,17 +133,11 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/shop" element={<Shop />} />
           <Route path="/products/:slug" element={<ProductDetail />} />
-          <Route path="/checkout" element={<Checkout />} />
-          <Route path="/order-confirmation/:id" element={<OrderConfirmation />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="/outlets" element={<Outlets />} />
-          {/* Public policy page — linked from the footer, product pages and
-              each order's summary, so it deliberately sits outside the
-              ProtectedRoute block. */}
-          <Route path="/shipping" element={<Shipping />} />
           <Route path="*" element={<ComingSoon label="Page Not Found" />} />
         </Route>
 

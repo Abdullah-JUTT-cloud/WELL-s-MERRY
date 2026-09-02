@@ -64,15 +64,15 @@ const Shipping = () => {
   );
 
   return (
-    <div className="bg-ivory min-h-screen">
-      {/* Banner — uses the shared `.page-banner` so spacing under the navbar
-          matches every other non-hero page. */}
-      <div className="page-banner">
-        <span className="eyebrow mb-3">Customer Care</span>
-        <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl text-ivory">
+    <div className="bg-merry-cream">
+      {/* Banner — forest green band, matching the global Merry shell.
+          (The legacy `.page-banner` black bar was part of the old theme.) */}
+      <div className="bg-merry-forest text-merry-cream text-center py-14 sm:py-20 border-b-4 border-merry-forest">
+        <span className="eyebrow mb-3 text-merry-clay">Customer Care</span>
+        <h1 className="font-slab text-3xl sm:text-4xl lg:text-5xl uppercase text-merry-cream">
           Shipping &amp; Returns
         </h1>
-        <p className="text-cream/60 max-w-xl mx-auto mt-4 px-6 leading-relaxed">
+        <p className="text-merry-sage max-w-xl mx-auto mt-4 px-6 leading-relaxed">
           How your order reaches you, what it costs, and what happens if
           something isn't right.
         </p>
@@ -84,9 +84,9 @@ const Shipping = () => {
           {HIGHLIGHTS.map(({ icon: Icon, title, desc }) => (
             <div
               key={title}
-              className="border border-cream-dim bg-white rounded-sm p-5 flex gap-4"
+              className="border-2 border-merry-forest bg-merry-oat p-5 flex gap-4"
             >
-              <span className="w-10 h-10 shrink-0 rounded-full border border-gold-1 flex items-center justify-center text-gold-1">
+              <span className="w-10 h-10 shrink-0 rounded-full border-2 border-merry-clay flex items-center justify-center text-merry-clay">
                 <Icon className="w-5 h-5" />
               </span>
               <div>
@@ -119,7 +119,7 @@ const Shipping = () => {
                 className="flex flex-wrap items-center justify-between gap-2 px-5 py-4"
               >
                 <span className="text-[13.5px] text-ink/70 flex items-center gap-2">
-                  <HiOutlineMapPin className="w-4 h-4 text-gold-1 shrink-0" />
+                  <HiOutlineMapPin className="w-4 h-4 text-merry-clay shrink-0" />
                   {row.label}
                 </span>
                 <span className="text-[13.5px] font-semibold">{row.value}</span>
@@ -265,12 +265,12 @@ const Shipping = () => {
         </section>
 
         {/* Help / contact */}
-        <section className="bg-espresso text-ivory rounded-sm p-8 sm:p-12 text-center">
-          <span className="eyebrow mb-3">Still Have A Question?</span>
-          <h3 className="font-display text-2xl sm:text-3xl text-ivory mb-3">
+        <section className="bg-merry-forest text-merry-cream border-4 border-merry-forest p-8 sm:p-12 text-center">
+          <span className="eyebrow mb-3 text-merry-clay">Still Have A Question?</span>
+          <h3 className="font-slab text-2xl sm:text-3xl uppercase text-merry-cream mb-3">
             Talk To A Human
           </h3>
-          <p className="text-cream/60 max-w-md mx-auto mb-8 text-[14px] leading-relaxed">
+          <p className="text-merry-sage max-w-md mx-auto mb-8 text-[14px] leading-relaxed">
             Have your order number handy and we'll get straight to it. WhatsApp
             is usually the fastest way to reach us.
           </p>
@@ -287,7 +287,7 @@ const Shipping = () => {
             </a>
             <a
               href={`mailto:${siteConfig.email}`}
-              className="flex-1 border border-ivory/40 text-ivory hover:bg-ivory hover:text-ink font-bold uppercase text-[12px] tracking-wider rounded-sm py-3.5 flex items-center justify-center gap-2 transition-colors"
+              className="flex-1 border-2 border-merry-cream/40 text-merry-cream hover:bg-merry-cream hover:text-merry-forest font-bold uppercase text-[12px] tracking-wider rounded-sm py-3.5 flex items-center justify-center gap-2 transition-colors"
             >
               <HiOutlineEnvelope className="w-4 h-4" />
               Email Us
@@ -296,7 +296,7 @@ const Shipping = () => {
 
           <Link
             to="/contact"
-            className="inline-flex items-center gap-2 mt-6 text-[12px] tracking-[0.14em] uppercase font-semibold text-gold-3 hover:text-ivory transition-colors"
+            className="inline-flex items-center gap-2 mt-6 text-[12px] tracking-[0.14em] uppercase font-semibold text-merry-clay hover:text-merry-cream transition-colors"
           >
             <HiOutlineChatBubbleLeftRight className="w-4 h-4" />
             Other ways to contact us

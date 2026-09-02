@@ -252,12 +252,13 @@ const Checkout = () => {
   };
 
   return (
-    <div className="container-content py-10 sm:py-16">
-      <h1 className="font-display text-3xl sm:text-4xl mb-2">Checkout</h1>
+    <div className="bg-merry-cream">
+      <div className="container-content py-10 sm:py-16">
+      <h1 className="font-slab uppercase text-3xl sm:text-4xl mb-2">Checkout</h1>
       {!isAuthenticated && (
         <p className="text-ink/50 text-sm mb-10">
           Checking out as guest.{" "}
-          <Link to="/login?redirect=/checkout" className="text-gold-1 hover:text-ink underline underline-offset-2">
+          <Link to="/login?redirect=/checkout" className="text-merry-clay hover:text-merry-forest underline underline-offset-2">
             Log in
           </Link>{" "}
           for faster checkout next time.
@@ -276,7 +277,7 @@ const Checkout = () => {
                 type="checkbox"
                 checked={useHomeAddress}
                 onChange={handleUseHomeToggle}
-                className="accent-gold-1 w-4 h-4 shrink-0"
+                className="accent-merry-clay w-4 h-4 shrink-0"
               />
               <span className="text-[13.5px] text-ink/70">
                 Delivery address is the same as my home address
@@ -323,7 +324,7 @@ const Checkout = () => {
               onChange={handleChange}
               rows={3}
               placeholder="Delivery instructions, landmark, etc."
-              className="w-full border border-cream-dim bg-white px-4 py-3 text-sm rounded-sm focus:outline-none focus:border-gold-2"
+              className="w-full border border-cream-dim bg-white px-4 py-3 text-sm rounded-sm focus:outline-none focus:border-merry-clay"
             />
           </div>
 
@@ -430,6 +431,7 @@ const Checkout = () => {
           </p>
         </div>
       </form>
+      </div>
     </div>
   );
 };
@@ -526,7 +528,7 @@ const OnlinePaymentPanel = ({
           onChange={(e) => setSenderAccount(e.target.value)}
           placeholder="03XX XXXXXXX"
           className={`w-full border bg-white px-4 py-3 text-sm rounded-sm focus:outline-none transition-colors
-            ${errors.onlineSenderAccount ? "border-red-400 focus:border-red-500" : "border-cream-dim focus:border-gold-2"}`}
+            ${errors.onlineSenderAccount ? "border-red-400 focus:border-red-500" : "border-cream-dim focus:border-merry-clay"}`}
         />
         {errors.onlineSenderAccount && <p className="text-red-500 text-[12px] mt-1.5">{errors.onlineSenderAccount}</p>}
       </div>
@@ -543,7 +545,7 @@ const OnlinePaymentPanel = ({
           placeholder={subtotal.toString()}
           min="1"
           className={`w-full border bg-white px-4 py-3 text-sm rounded-sm focus:outline-none transition-colors
-            ${errors.onlineTransactionAmount ? "border-red-400 focus:border-red-500" : "border-cream-dim focus:border-gold-2"}`}
+            ${errors.onlineTransactionAmount ? "border-red-400 focus:border-red-500" : "border-cream-dim focus:border-merry-clay"}`}
         />
         {errors.onlineTransactionAmount && <p className="text-red-500 text-[12px] mt-1.5">{errors.onlineTransactionAmount}</p>}
       </div>
@@ -571,7 +573,7 @@ const OnlinePaymentPanel = ({
                   <HiOutlineCheckCircle className="w-4 h-4" /> Receipt uploaded
                 </p>
                 <p className="text-[11.5px] text-ink/50 mt-0.5">{receiptFile.name}</p>
-                <p className="text-[11.5px] text-gold-1 mt-1 underline underline-offset-2">Change file</p>
+                <p className="text-[11.5px] text-merry-clay mt-1 underline underline-offset-2">Change file</p>
               </div>
             </div>
           ) : (
@@ -604,7 +606,7 @@ const Field = ({ label, name, value, onChange, error, type = "text", placeholder
       disabled={disabled}
       className={`w-full border bg-white px-4 py-3 text-sm rounded-sm focus:outline-none transition-colors
         disabled:bg-cream disabled:text-ink/50
-        ${error ? "border-red-400 focus:border-red-500" : "border-cream-dim focus:border-gold-2"}`}
+        ${error ? "border-red-400 focus:border-red-500" : "border-cream-dim focus:border-merry-clay"}`}
     />
     {error && <p className="text-red-500 text-[12px] mt-1.5">{error}</p>}
   </div>
@@ -624,15 +626,15 @@ const PaymentOption = ({ id, label, desc, icon: Icon, selected, onSelect, disabl
       checked={selected}
       onChange={onSelect}
       disabled={disabled}
-      className="accent-gold-1 w-4 h-4"
+      className="accent-merry-clay w-4 h-4"
     />
-    <Icon className="w-5 h-5 text-gold-1 shrink-0" />
+    <Icon className="w-5 h-5 text-merry-clay shrink-0" />
     <div className="flex-1 min-w-0">
       <p className="text-[14px] font-medium">{label}</p>
       <p className="text-[12.5px] text-ink/50">{desc}</p>
     </div>
     {soon && (
-      <span className="text-[10px] tracking-[0.08em] uppercase bg-espresso text-gold-3 px-2.5 py-1 rounded-full shrink-0">
+      <span className="text-[10px] tracking-[0.08em] uppercase bg-merry-forest text-merry-clay px-2.5 py-1 rounded-full shrink-0">
         Coming Soon
       </span>
     )}

@@ -8,6 +8,8 @@ import {
   WavyDivider,
   RealResultsBanner,
   IngredientSpotlight,
+  NoBsFaq,
+  CommunityGrid,
   LeafIcon,
 } from "../../components/merry/index.js";
 import {
@@ -327,8 +329,16 @@ const Home = () => {
           Macro image left, "NO SECRETS. JUST SCIENCE." + 2×2 proof grid right. */}
       <IngredientSpotlight />
 
+      {/* Flow 7 — TRUST BLOCK C: objection handling.
+          Cream band, sticky "QUESTIONS? GOOD." headline + chunky accordion. */}
+      <NoBsFaq />
+
+      {/* Flow 8 — TRUST BLOCK D: community proof.
+          Forest band, asymmetric bento wall of UGC + stylized reviews. */}
+      <CommunityGrid />
+
       {/* Hand-off into the footer's clay newsletter band */}
-      <WavyDivider from="oat" to="clay" variant="swell" />
+      <WavyDivider from="forest" to="clay" variant="swell" />
     </>
   );
 };
