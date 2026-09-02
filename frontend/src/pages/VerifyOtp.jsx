@@ -2,7 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext.jsx";
-import logo from "../assets/nav-up.png";
+import AuthLayout from "../components/merry/AuthLayout.jsx";
+import { AuthSubmit, AuthGhostLink } from "../components/merry/AuthForm.jsx";
 
 const OTP_LENGTH = 6;
 const RESEND_COOLDOWN = 30; // seconds
@@ -35,13 +36,23 @@ const VerifyOtp = () => {
 
   if (!userId) {
     return (
-      <div className="container-content py-24 text-center max-w-md mx-auto">
-        <h1 className="font-display text-3xl mb-3">Nothing to Verify</h1>
-        <p className="text-ink/55 mb-8">
-          This page needs to be reached from registration or login. Please sign up first.
-        </p>
-        <Link to="/register" className="btn btn-dark">Create an Account</Link>
-      </div>
+      <AuthLayout
+        compact
+        eyebrow="Dead end"
+        title={
+          <>
+            Nothing to
+            <br />
+            <span className="text-merry-clay">verify.</span>
+          </>
+        }
+        subtitle="This screen needs to be reached from registration or login. Sign up first and we'll email you a fresh code."
+      >
+        <div className="space-y-4">
+          <AuthGhostLink to="/register">Create an account</AuthGhostLink>
+          <AuthGhostLink to="/login">Back to log in</AuthGhostLink>
+        </div>
+      </AuthLayout>
     );
   }
 
@@ -116,53 +127,84 @@ const VerifyOtp = () => {
   };
 
   return (
-    <div className="container-content py-16 sm:py-24 max-w-md mx-auto text-center">
-      <img src={logo} alt="Well's Merry" className="h-14 w-auto mx-auto mb-6 rounded-md" />
-      <h1 className="font-display text-3xl mb-2">Verify Your Email</h1>
-      <p className="text-ink/55 text-sm mb-1">We sent a 6-digit code to</p>
-      <p className="text-ink font-medium text-sm mb-10">{email || "your email address"}</p>
-
-      <form onSubmit={handleSubmit}>
-        <div className="flex justify-center gap-2.5 sm:gap-3 mb-8" onPaste={handlePaste}>
-          {digits.map((digit, i) => (
-            <input
-              key={i}
-              ref={(el) => (inputRefs.current[i] = el)}
-              type="text"
-              inputMode="numeric"
-              maxLength={1}
-              value={digit}
-              onChange={(e) => handleDigitChange(i, e.target.value)}
-              onKeyDown={(e) => handleKeyDown(i, e)}
-              className="w-11 h-13 sm:w-12 sm:h-14 text-center text-xl font-display border border-cream-dim rounded-sm
-                         focus:outline-none focus:border-gold-2 bg-white"
-            />
-          ))}
+    <AuthLayout
+      eyebrow="One last step"
+      title={
+        <>
+          Verify
+          <br />
+          your <span className="text-merry-clay">email.</span>
+        </>
+      }
+      subtitle={
+        <>
+          We sent a 6-digit code to{" "}
+          <span className="font-bold text-merry-forest">{email || "your email address"}</span>.
+          It expires in 15 minutes.
+        </>
+      }
+      quote={{
+        text: "Good things take an hour. Verification takes six digits.",
+        author: "Well's Merry",
+      }}
+      footer={
+        <p className="text-center text-[12px] font-medium leading-relaxed text-merry-forest/50">
+          Nothing in your inbox? Check the spam folder — our emails are as
+          unprocessed as the oil.{" "}
+          <Link to="/contact" className="font-bold text-merry-clay underline decoration-2 underline-offset-4">
+            Contact us
+          </Link>
+        </p>
+      }
+    >
+      <form onSubmit={handleSubmit} className="space-y-8">
+        <div>
+          <p className="mb-3 font-slab text-[11px] uppercase tracking-widest2 text-merry-forest">
+            Verification code
+          </p>
+          <div className="flex gap-2 sm:gap-3" onPaste={handlePaste}>
+            {digits.map((digit, i) => (
+              <input
+                key={i}
+                ref={(el) => (inputRefs.current[i] = el)}
+                type="text"
+                inputMode="numeric"
+                maxLength={1}
+                value={digit}
+                aria-label={`Digit ${i + 1} of ${OTP_LENGTH}`}
+                onChange={(e) => handleDigitChange(i, e.target.value)}
+                onKeyDown={(e) => handleKeyDown(i, e)}
+                className="h-16 w-full min-w-0 border-4 border-merry-forest bg-merry-cream text-center
+                           font-slab text-2xl text-merry-forest transition-colors duration-150
+                           focus:border-merry-clay focus:outline-none focus:ring-4 focus:ring-merry-clay/30
+                           sm:h-[4.5rem] sm:text-3xl"
+              />
+            ))}
+          </div>
         </div>
 
-        <button type="submit" disabled={submitting} className="btn btn-dark w-full">
-          {submitting ? "Verifying..." : "Verify Email"}
-        </button>
+        <AuthSubmit loading={submitting} loadingLabel="Verifying…">
+          Verify email
+        </AuthSubmit>
+
+        <div className="border-4 border-merry-forest/15 bg-merry-oat px-5 py-4 text-center">
+          {cooldown > 0 ? (
+            <p className="text-[12px] font-bold uppercase tracking-widest2 text-merry-forest/55">
+              Resend code in {cooldown}s
+            </p>
+          ) : (
+            <button
+              type="button"
+              onClick={handleResend}
+              disabled={resending}
+              className="font-slab text-[12px] uppercase tracking-widest2 text-merry-clay underline decoration-4 underline-offset-4 hover:text-merry-forest disabled:opacity-50"
+            >
+              {resending ? "Sending…" : "Resend code"}
+            </button>
+          )}
+        </div>
       </form>
-
-      <div className="mt-8 text-[13.5px] text-ink/55">
-        {cooldown > 0 ? (
-          <span>Resend code in {cooldown}s</span>
-        ) : (
-          <button
-            onClick={handleResend}
-            disabled={resending}
-            className="text-gold-1 hover:text-ink font-medium disabled:opacity-50"
-          >
-            {resending ? "Sending..." : "Resend Code"}
-          </button>
-        )}
-      </div>
-
-      <p className="text-[12px] text-ink/40 mt-10">
-        Code expires in 15 minutes. Check your spam folder if it doesn't arrive shortly.
-      </p>
-    </div>
+    </AuthLayout>
   );
 };
 

@@ -66,6 +66,7 @@ import React from "react";
 import { renderToString } from "react-dom/server";
 import { MemoryRouter } from "react-router-dom";
 import { CartProvider } from "./src/context/CartContext.jsx";
+import { AuthProvider } from "./src/context/AuthContext.jsx";
 import MerryLayout from "./src/components/merry/Layout.jsx";
 import HomeMerry from "./src/pages/merry/HomeMerry.jsx";
 import ShopMerry from "./src/pages/merry/ShopMerry.jsx";
@@ -74,6 +75,12 @@ import QuizMerry from "./src/pages/merry/QuizMerry.jsx";
 import OutletsMerry from "./src/pages/merry/OutletsMerry.jsx";
 import ProductDetailMerry from "./src/pages/merry/ProductDetailMerry.jsx";
 import MerryMap from "./src/components/merry/MerryMap.jsx";
+import Cart from "./src/pages/Cart.jsx";
+import Orders from "./src/pages/Orders.jsx";
+import Login from "./src/pages/Login.jsx";
+import Register from "./src/pages/Register.jsx";
+import VerifyOtp from "./src/pages/VerifyOtp.jsx";
+import ForgotPassword from "./src/pages/ForgotPassword.jsx";
 import { MERRY_OUTLETS } from "./src/data/merry/mock.js";
 
 const routes = {
@@ -83,6 +90,17 @@ const routes = {
   "/quiz (QuizMerry)": ["/quiz", QuizMerry],
   "/outlets (OutletsMerry)": ["/outlets", OutletsMerry],
   "/product/:slug (PDP)": ["/product/hair-care-oil", ProductDetailMerry],
+  "/cart (merry Cart)": ["/cart", Cart],
+  "/account/orders (Track)": ["/account/orders", Orders],
+};
+
+/* Auth routes render inside the 50/50 AuthLayout and read AuthContext,
+   so they get their own provider stack. */
+const authRoutes = {
+  "/login (AuthLayout)": ["/login", Login],
+  "/register (AuthLayout)": ["/register", Register],
+  "/verify-otp (AuthLayout)": ["/verify-otp", VerifyOtp],
+  "/forgot-password (Auth)": ["/forgot-password", ForgotPassword],
 };
 
 const results = [];
@@ -96,6 +114,24 @@ for (const [label, [entry, Page]] of Object.entries(routes)) {
       )
     );
     if (!html || html.length < 500) throw new Error("suspiciously small render: " + html.length + " chars");
+    results.push([label, "OK", html.length + " chars"]);
+  } catch (e) {
+    results.push([label, "FAIL", e.stack.split("\\n").slice(0, 4).join(" | ")]);
+  }
+}
+
+for (const [label, [entry, Page]] of Object.entries(authRoutes)) {
+  try {
+    const html = renderToString(
+      React.createElement(
+        MemoryRouter,
+        { initialEntries: [entry] },
+        React.createElement(AuthProvider, null,
+          React.createElement(CartProvider, null, React.createElement(Page)))
+      )
+    );
+    if (!html || html.length < 500) throw new Error("suspiciously small render: " + html.length + " chars");
+    if (!html.includes("lg:w-1/2")) throw new Error("AuthLayout 50/50 split missing from markup");
     results.push([label, "OK", html.length + " chars"]);
   } catch (e) {
     results.push([label, "FAIL", e.stack.split("\\n").slice(0, 4).join(" | ")]);

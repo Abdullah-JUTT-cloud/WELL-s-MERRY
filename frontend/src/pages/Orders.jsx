@@ -13,14 +13,28 @@ import {
   HiOutlineCreditCard,
 } from "react-icons/hi2";
 import { getMyOrders } from "../api/orders.js";
-import { OrderListSkeleton } from "../components/Skeleton.jsx";
+import { SkeletonBox, SkeletonText } from "../components/Skeleton.jsx";
+import { LeafIcon } from "../components/merry/icons.jsx";
+
+/* =====================================================================
+   TRACK ORDER — Merry theme.
+
+   Same data contract and fulfilment logic as before, rebuilt on the
+   organic palette: Deep Forest (#1A2E24) surfaces, Cream (#F9F6F0)
+   page, Terracotta (#C17754) accents. The legacy gold/ivory ("orange")
+   tokens — gold-1 icons, ink page-banner, cream-dim hairlines — are
+   gone; every edge is a 4px forest rule.
+
+   Rendered inside MerryLayout (App.jsx) so the organic Navbar/Footer
+   wrap it instead of the old shell.
+   ===================================================================== */
 
 const STATUS_STYLES = {
-  placed: "bg-cream text-ink/70",
-  confirmed: "bg-gold-2/20 text-gold-1",
-  shipped: "bg-moss/15 text-moss",
-  delivered: "bg-moss text-ivory",
-  cancelled: "bg-red-100 text-red-600",
+  placed: "border-merry-forest bg-merry-oat text-merry-forest",
+  confirmed: "border-merry-clay bg-merry-clay text-merry-cream",
+  shipped: "border-merry-moss bg-merry-moss text-merry-cream",
+  delivered: "border-merry-forest bg-merry-forest text-merry-cream",
+  cancelled: "border-red-700 bg-red-50 text-red-700",
 };
 
 // The fulfilment journey, in order. Mirrors the `orderStatus` enum in
@@ -77,6 +91,27 @@ const formatDateTime = (value) =>
 
 const money = (n) => `Rs.${Number(n || 0).toLocaleString()}`;
 
+/* Merry-skinned loading state — blocky cards, not rounded ivory ones. */
+const OrdersSkeleton = ({ count = 3 }) => (
+  <div role="status" aria-label="Loading your orders" className="space-y-5">
+    {Array.from({ length: count }).map((_, i) => (
+      <div
+        key={i}
+        className="flex flex-wrap items-center justify-between gap-4 border-4 border-merry-forest/20 bg-merry-oat p-5 sm:p-6"
+      >
+        <div className="space-y-2.5">
+          <SkeletonText className="h-3 w-32" />
+          <SkeletonText className="h-3.5 w-44" />
+        </div>
+        <div className="flex items-center gap-4">
+          <SkeletonBox className="h-7 w-24" />
+          <SkeletonText className="h-4 w-20" />
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
 /**
  * Vertical progress tracker for a single order.
  *
@@ -89,11 +124,13 @@ const StatusTracker = ({ order }) => {
 
   if (order.orderStatus === "cancelled") {
     return (
-      <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-100 rounded-sm">
-        <HiOutlineXCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+      <div className="flex items-start gap-3 border-4 border-red-700 bg-red-50 p-4">
+        <HiOutlineXCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-700" />
         <div>
-          <p className="text-[13.5px] font-semibold text-red-700">Order Cancelled</p>
-          <p className="text-[12.5px] text-red-600/80 mt-0.5">
+          <p className="font-slab text-[13px] uppercase tracking-wide text-red-800">
+            Order cancelled
+          </p>
+          <p className="mt-1 text-[12.5px] font-medium text-red-700/80">
             If this wasn't expected, get in touch and we'll sort it out.
           </p>
         </div>
@@ -115,44 +152,52 @@ const StatusTracker = ({ order }) => {
           stamp = formatDateTime(order.deliveredAt);
 
         return (
-          <li key={step.key} className="relative flex gap-4 pb-6 last:pb-0">
+          <li key={step.key} className="relative flex gap-4 pb-7 last:pb-0">
             {/* Connector line between markers */}
             {!isLast && (
               <span
                 aria-hidden="true"
-                className={`absolute left-[15px] top-8 bottom-0 w-[2px] ${
-                  i < currentIndex ? "bg-moss" : "bg-cream-dim"
+                className={`absolute bottom-0 left-[18px] top-10 w-1 ${
+                  i < currentIndex ? "bg-merry-clay" : "bg-merry-forest/15"
                 }`}
               />
             )}
 
             <span
-              className={`relative z-10 w-8 h-8 shrink-0 rounded-full border flex items-center justify-center transition-colors ${
+              className={`relative z-10 grid h-10 w-10 shrink-0 place-items-center border-4 transition-colors ${
                 done
-                  ? "bg-moss border-moss text-ivory"
-                  : "bg-white border-cream-dim text-ink/30"
-              } ${isCurrent ? "ring-4 ring-moss/15" : ""}`}
+                  ? "border-merry-forest bg-merry-clay text-merry-cream"
+                  : "border-merry-forest/25 bg-merry-cream text-merry-forest/30"
+              } ${isCurrent ? "shadow-hard-merry-sm" : ""}`}
             >
-              <Icon className="w-4 h-4" />
+              <Icon className="h-4 w-4" strokeWidth={2.2} />
             </span>
 
-            <div className="pt-1">
+            <div className="pt-1.5">
               <p
-                className={`text-[13.5px] font-semibold ${
-                  done ? "text-ink" : "text-ink/40"
+                className={`flex flex-wrap items-center gap-2 font-slab text-[13px] uppercase tracking-wide ${
+                  done ? "text-merry-forest" : "text-merry-forest/40"
                 }`}
               >
                 {step.label}
                 {isCurrent && (
-                  <span className="ml-2 text-[10px] tracking-[0.1em] uppercase font-bold text-moss">
+                  <span className="border-2 border-merry-clay px-2 py-0.5 text-[9px] font-bold tracking-widest2 text-merry-clay">
                     Current
                   </span>
                 )}
               </p>
-              <p className={`text-[12.5px] mt-0.5 ${done ? "text-ink/55" : "text-ink/35"}`}>
+              <p
+                className={`mt-1 text-[12.5px] font-medium ${
+                  done ? "text-merry-forest/65" : "text-merry-forest/35"
+                }`}
+              >
                 {step.blurb}
               </p>
-              {stamp && <p className="text-[11.5px] text-ink/40 mt-1">{stamp}</p>}
+              {stamp && (
+                <p className="mt-1 text-[11px] font-bold uppercase tracking-wider text-merry-forest/40">
+                  {stamp}
+                </p>
+              )}
             </div>
           </li>
         );
@@ -168,13 +213,13 @@ const PriceBreakdown = ({ order }) => {
   );
 
   return (
-    <div className="text-[13px] space-y-1.5">
+    <div className="space-y-1.5 text-[13px] font-medium">
       <div className="flex justify-between">
-        <span className="text-ink/55">Items</span>
+        <span className="text-merry-forest/55">Items</span>
         <span>{money(order.itemsPrice)}</span>
       </div>
       <div className="flex justify-between">
-        <span className="text-ink/55">Shipping</span>
+        <span className="text-merry-forest/55">Shipping</span>
         <span>{order.shippingPrice > 0 ? money(order.shippingPrice) : "Free"}</span>
       </div>
 
@@ -182,21 +227,21 @@ const PriceBreakdown = ({ order }) => {
           named charges shows up without changing this component. */}
       {(order.extraCharges || []).map((charge, i) => (
         <div key={i} className="flex justify-between">
-          <span className="text-ink/55">{charge.label}</span>
+          <span className="text-merry-forest/55">{charge.label}</span>
           <span>{money(charge.amount)}</span>
         </div>
       ))}
 
       {order.discount > 0 && (
-        <div className="flex justify-between text-moss">
+        <div className="flex justify-between text-merry-moss">
           <span>Discount</span>
           <span>-{money(order.discount)}</span>
         </div>
       )}
 
-      <div className="flex justify-between pt-2.5 mt-1.5 border-t border-cream-dim font-display text-[16px]">
-        <span>Total</span>
-        <span>{money(order.totalPrice)}</span>
+      <div className="mt-2 flex items-center justify-between border-t-4 border-merry-forest pt-3">
+        <span className="font-slab text-sm uppercase">Total</span>
+        <span className="font-slab text-lg text-merry-clay">{money(order.totalPrice)}</span>
       </div>
 
       {/* Sanity hint if the stored total ever drifts from its parts. Cheap to
@@ -204,7 +249,7 @@ const PriceBreakdown = ({ order }) => {
       {Math.abs(
         order.itemsPrice + order.shippingPrice + extraTotal - order.discount - order.totalPrice
       ) > 0.5 && (
-        <p className="text-[11.5px] text-ink/40 pt-1">
+        <p className="pt-1 text-[11px] text-merry-forest/45">
           Totals were adjusted after this order was placed.
         </p>
       )}
@@ -217,17 +262,17 @@ const OrderCard = ({ order, defaultOpen = false }) => {
   const itemCount = order.orderItems.reduce((n, i) => n + i.qty, 0);
 
   return (
-    <div className="border border-cream-dim bg-white rounded-sm overflow-hidden">
+    <div className="border-4 border-merry-forest bg-merry-cream shadow-hard-merry-sm">
       <button
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className="w-full flex flex-wrap items-center justify-between gap-3 p-5 sm:p-6 text-left hover:bg-cream/30 transition-colors"
+        className="flex w-full flex-wrap items-center justify-between gap-3 p-5 text-left transition-colors hover:bg-merry-oat sm:p-6"
       >
         <div className="min-w-0">
-          <p className="text-[11px] tracking-[0.1em] uppercase text-ink/40 mb-1">
+          <p className="font-slab text-[11px] uppercase tracking-widest2 text-merry-clay">
             Order #{order._id.slice(-8).toUpperCase()}
           </p>
-          <p className="text-[13.5px] text-ink/60">
+          <p className="mt-1.5 text-[13px] font-medium text-merry-forest/65">
             {formatDate(order.createdAt)}
             {" · "}
             {itemCount} item{itemCount !== 1 ? "s" : ""}
@@ -236,52 +281,59 @@ const OrderCard = ({ order, defaultOpen = false }) => {
 
         <div className="flex items-center gap-3 sm:gap-4">
           <span
-            className={`px-3 py-1.5 rounded-full text-[11px] tracking-[0.06em] uppercase font-medium ${
+            className={`border-2 px-3 py-1.5 font-slab text-[10px] uppercase tracking-widest2 ${
               STATUS_STYLES[order.orderStatus] || STATUS_STYLES.placed
             }`}
           >
             {order.orderStatus}
           </span>
-          <span className="font-display text-[16px]">{money(order.totalPrice)}</span>
+          <span className="font-slab text-base text-merry-clay">{money(order.totalPrice)}</span>
           <HiOutlineChevronDown
-            className={`w-4 h-4 shrink-0 transition-transform duration-300 ${
+            className={`h-5 w-5 shrink-0 transition-transform duration-300 ${
               open ? "rotate-180" : ""
             }`}
+            strokeWidth={2.4}
           />
         </div>
       </button>
 
       {open && (
-        <div className="border-t border-cream-dim">
+        <div className="border-t-4 border-merry-forest">
           {/* Tracking */}
-          <div className="p-5 sm:p-6 bg-cream/20 border-b border-cream-dim">
-            <p className="text-[11px] tracking-[0.1em] uppercase text-ink/40 mb-4">
+          <div className="border-b-4 border-merry-forest/15 bg-merry-oat p-5 sm:p-6">
+            <p className="mb-5 font-slab text-[10px] uppercase tracking-widest2 text-merry-forest/50">
               Tracking
             </p>
             <StatusTracker order={order} />
           </div>
 
           {/* Items */}
-          <div className="p-5 sm:p-6 space-y-4 border-b border-cream-dim">
-            <p className="text-[11px] tracking-[0.1em] uppercase text-ink/40">Items</p>
+          <div className="space-y-4 border-b-4 border-merry-forest/15 p-5 sm:p-6">
+            <p className="font-slab text-[10px] uppercase tracking-widest2 text-merry-forest/50">
+              Items
+            </p>
             {order.orderItems.map((item, i) => (
               <div key={i} className="flex items-center gap-4">
-                <img
-                  src={item.image}
-                  alt={item.name}
-                  loading="lazy"
-                  className="w-14 h-14 rounded-sm object-cover shrink-0 bg-cream"
-                />
-                <div className="flex-1 min-w-0">
-                  <p className="text-[14px] font-medium truncate">{item.name}</p>
-                  <p className="text-[12.5px] text-ink/45">
+                <div className="h-16 w-16 shrink-0 overflow-hidden border-4 border-merry-forest bg-merry-oat">
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    loading="lazy"
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-slab text-[13px] uppercase tracking-wide">
+                    {item.name}
+                  </p>
+                  <p className="mt-1 text-[12.5px] font-medium text-merry-forest/50">
                     Qty {item.qty}
                     {item.size ? ` · ${item.size}` : ""}
                     {" · "}
                     {money(item.price)} each
                   </p>
                 </div>
-                <span className="text-[13.5px] shrink-0">
+                <span className="shrink-0 font-slab text-[13px]">
                   {money(item.price * item.qty)}
                 </span>
               </div>
@@ -289,14 +341,14 @@ const OrderCard = ({ order, defaultOpen = false }) => {
           </div>
 
           {/* Delivery + payment + totals */}
-          <div className="p-5 sm:p-6 grid sm:grid-cols-2 gap-6">
-            <div className="space-y-5">
+          <div className="grid gap-8 p-5 sm:grid-cols-2 sm:p-6">
+            <div className="space-y-6">
               <div>
-                <p className="text-[11px] tracking-[0.1em] uppercase text-ink/40 mb-2">
-                  Delivery Address
+                <p className="mb-2.5 font-slab text-[10px] uppercase tracking-widest2 text-merry-forest/50">
+                  Delivery address
                 </p>
-                <div className="flex items-start gap-2 text-[13px] text-ink/70">
-                  <HiOutlineMapPin className="w-4 h-4 text-gold-1 shrink-0 mt-0.5" />
+                <div className="flex items-start gap-2 text-[13px] font-medium text-merry-forest/75">
+                  <HiOutlineMapPin className="mt-0.5 h-4 w-4 shrink-0 text-merry-clay" strokeWidth={2} />
                   <span>
                     {order.shippingAddress.fullName}
                     <br />
@@ -308,33 +360,30 @@ const OrderCard = ({ order, defaultOpen = false }) => {
                       : ""}
                   </span>
                 </div>
-                <div className="flex items-center gap-2 text-[13px] text-ink/70 mt-2">
-                  <HiOutlinePhone className="w-4 h-4 text-gold-1 shrink-0" />
-                  <a
-                    href={`tel:${order.shippingAddress.phone}`}
-                    className="hover:text-ink"
-                  >
+                <div className="mt-2 flex items-center gap-2 text-[13px] font-medium text-merry-forest/75">
+                  <HiOutlinePhone className="h-4 w-4 shrink-0 text-merry-clay" strokeWidth={2} />
+                  <a href={`tel:${order.shippingAddress.phone}`} className="hover:text-merry-clay">
                     {order.shippingAddress.phone}
                   </a>
                 </div>
               </div>
 
               <div>
-                <p className="text-[11px] tracking-[0.1em] uppercase text-ink/40 mb-2">
+                <p className="mb-2.5 font-slab text-[10px] uppercase tracking-widest2 text-merry-forest/50">
                   Payment
                 </p>
-                <div className="flex items-center gap-2 text-[13px] text-ink/70">
-                  <HiOutlineCreditCard className="w-4 h-4 text-gold-1 shrink-0" />
+                <div className="flex items-center gap-2 text-[13px] font-medium text-merry-forest/75">
+                  <HiOutlineCreditCard className="h-4 w-4 shrink-0 text-merry-clay" strokeWidth={2} />
                   <span>
                     {PAYMENT_LABELS[order.paymentMethod] || order.paymentMethod}
                     {" · "}
                     <span
                       className={
                         order.paymentStatus === "paid"
-                          ? "text-moss font-medium"
+                          ? "font-bold text-merry-moss"
                           : order.paymentStatus === "failed"
-                          ? "text-red-600 font-medium"
-                          : "text-ink/50"
+                          ? "font-bold text-red-700"
+                          : "text-merry-forest/50"
                       }
                     >
                       {order.paymentStatus === "paid"
@@ -346,7 +395,7 @@ const OrderCard = ({ order, defaultOpen = false }) => {
                   </span>
                 </div>
                 {order.onlinePayment?.provider && (
-                  <p className="text-[12.5px] text-ink/50 mt-1 pl-6 capitalize">
+                  <p className="mt-1 pl-6 text-[12.5px] font-medium capitalize text-merry-forest/50">
                     via {order.onlinePayment.provider}
                   </p>
                 )}
@@ -354,32 +403,34 @@ const OrderCard = ({ order, defaultOpen = false }) => {
 
               {order.notes && (
                 <div>
-                  <p className="text-[11px] tracking-[0.1em] uppercase text-ink/40 mb-2">
-                    Order Notes
+                  <p className="mb-2.5 font-slab text-[10px] uppercase tracking-widest2 text-merry-forest/50">
+                    Order notes
                   </p>
-                  <p className="text-[13px] text-ink/65 leading-relaxed">{order.notes}</p>
+                  <p className="text-[13px] font-medium leading-relaxed text-merry-forest/65">
+                    {order.notes}
+                  </p>
                 </div>
               )}
             </div>
 
             <div>
-              <p className="text-[11px] tracking-[0.1em] uppercase text-ink/40 mb-3">
+              <p className="mb-3 font-slab text-[10px] uppercase tracking-widest2 text-merry-forest/50">
                 Summary
               </p>
               <PriceBreakdown order={order} />
 
-              <div className="mt-5 pt-4 border-t border-cream-dim space-y-2">
+              <div className="mt-5 space-y-2.5 border-t-4 border-merry-forest/15 pt-4">
                 <Link
                   to="/shipping"
-                  className="block text-[12px] tracking-[0.1em] uppercase font-semibold text-ink hover:text-gold-1 transition-colors"
+                  className="block font-slab text-[11px] uppercase tracking-widest2 text-merry-forest transition-colors hover:text-merry-clay"
                 >
-                  Shipping &amp; Returns Policy
+                  Shipping &amp; returns policy
                 </Link>
                 <Link
                   to="/contact"
-                  className="block text-[12px] tracking-[0.1em] uppercase font-semibold text-ink hover:text-gold-1 transition-colors"
+                  className="block font-slab text-[11px] uppercase tracking-widest2 text-merry-forest transition-colors hover:text-merry-clay"
                 >
-                  Need Help With This Order?
+                  Need help with this order?
                 </Link>
               </div>
             </div>
@@ -431,61 +482,83 @@ const Orders = () => {
   }, [orders]);
 
   return (
-    <div className="bg-ivory min-h-screen">
-      <div className="page-banner">
-        <span className="eyebrow mb-3">Your Account</span>
-        <h1 className="font-display text-3xl sm:text-4xl text-ivory">Track Your Order</h1>
-        <p className="text-cream/60 max-w-md mx-auto mt-3 px-6 text-[14px] leading-relaxed">
-          Follow each order from the moment it's placed through to delivery.
-        </p>
+    <div className="min-h-screen bg-merry-cream">
+      {/* ── Page banner ─────────────────────────────────────────────── */}
+      <div className="border-b-4 border-merry-forest bg-merry-forest text-merry-cream">
+        <div className="mx-auto max-w-[1440px] px-6 py-12 sm:px-10 sm:py-16">
+          <p className="flex items-center gap-2.5 font-slab text-[11px] uppercase tracking-widest2 text-merry-clay">
+            <LeafIcon className="h-4 w-4" />
+            Your account
+          </p>
+          <h1 className="mt-4 text-5xl uppercase leading-[0.92] text-merry-cream sm:text-6xl">
+            Track your
+            <br />
+            <span className="text-merry-clay">order.</span>
+          </h1>
+          <p className="mt-5 max-w-md text-sm font-medium leading-relaxed text-merry-sage sm:text-base">
+            Follow every order from the moment it's placed through to the knock
+            on your door.
+          </p>
+        </div>
       </div>
 
-      <div className="container-content py-12 sm:py-16 max-w-3xl mx-auto">
+      <div className="mx-auto max-w-3xl px-6 py-12 sm:px-10 sm:py-16">
         {loading ? (
-          <OrderListSkeleton count={3} />
+          <OrdersSkeleton count={3} />
         ) : error ? (
-          <div className="text-center py-16">
-            <p className="text-ink/60 mb-4">Couldn't load your orders right now.</p>
-            <button onClick={() => window.location.reload()} className="btn btn-outline">
-              Try Again
+          <div className="border-4 border-merry-forest bg-merry-oat p-10 text-center shadow-hard-merry-sm">
+            <p className="mb-6 font-slab text-lg uppercase">Couldn't load your orders</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="pressable inline-flex items-center gap-2 border-4 border-merry-forest bg-merry-cream px-7 py-3.5 font-slab text-sm uppercase tracking-wide shadow-hard-merry-sm hover:bg-merry-oat"
+            >
+              Try again
             </button>
           </div>
         ) : orders.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="w-14 h-14 mx-auto mb-6 rounded-full border border-cream-dim flex items-center justify-center text-ink/30">
-              <HiOutlineShoppingBag className="w-6 h-6" />
+          <div className="border-4 border-merry-forest bg-merry-oat p-10 text-center shadow-hard-merry sm:p-14">
+            <div className="mx-auto grid h-16 w-16 place-items-center border-4 border-merry-forest bg-merry-cream text-merry-forest">
+              <HiOutlineShoppingBag className="h-7 w-7" />
             </div>
-            <h3 className="font-display text-2xl mb-3">No Orders Yet</h3>
-            <p className="text-ink/55 mb-8">
-              When you place an order, you'll be able to track it here.
+            <h2 className="mt-7 text-3xl uppercase leading-[0.98]">No orders yet</h2>
+            <p className="mx-auto mt-4 max-w-sm text-sm font-medium text-merry-forest/65">
+              When you place an order, its live tracking lands right here.
             </p>
-            <Link to="/shop" className="btn btn-dark">
-              Start Shopping
+            <Link
+              to="/shop"
+              className="pressable mt-8 inline-flex items-center gap-3 border-4 border-merry-forest bg-merry-clay px-8 py-4 font-slab text-base uppercase tracking-wide text-merry-cream shadow-hard-merry"
+            >
+              Start shopping
+              <LeafIcon className="h-5 w-5" />
             </Link>
           </div>
         ) : (
-          <div className="space-y-10">
+          <div className="space-y-12">
             {/* Active orders — the first one is expanded so the most recent
                 order's tracking is visible without an extra click. */}
             <section>
-              <h2 className="text-[11px] tracking-[0.14em] uppercase text-ink/45 font-semibold mb-4">
-                In Progress
+              <h2 className="mb-5 flex items-center gap-2.5 font-slab text-[11px] uppercase tracking-widest2 text-merry-forest">
+                <LeafIcon className="h-3.5 w-3.5 text-merry-clay" />
+                In progress
                 {active.length > 0 && (
-                  <span className="ml-2 text-ink/30">({active.length})</span>
+                  <span className="text-merry-forest/40">({active.length})</span>
                 )}
               </h2>
 
               {active.length === 0 ? (
-                <div className="border border-cream-dim bg-white rounded-sm p-8 text-center">
-                  <p className="text-ink/55 text-[14px] mb-5">
+                <div className="border-4 border-merry-forest/20 bg-merry-oat p-8 text-center">
+                  <p className="mb-5 text-sm font-medium text-merry-forest/65">
                     Nothing on the way right now.
                   </p>
-                  <Link to="/shop" className="btn btn-outline">
-                    Shop the Collection
+                  <Link
+                    to="/shop"
+                    className="pressable inline-flex items-center gap-2 border-4 border-merry-forest bg-merry-cream px-7 py-3.5 font-slab text-sm uppercase tracking-wide shadow-hard-merry-sm hover:bg-merry-cream"
+                  >
+                    Shop the collection
                   </Link>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-5">
                   {active.map((order, i) => (
                     <OrderCard key={order._id} order={order} defaultOpen={i === 0} />
                   ))}
@@ -499,26 +572,27 @@ const Orders = () => {
                 <button
                   onClick={() => setHistoryOpen((v) => !v)}
                   aria-expanded={historyOpen}
-                  className="w-full flex items-center justify-between gap-3 border border-cream-dim bg-white rounded-sm px-5 py-4 hover:bg-cream/30 transition-colors"
+                  className="flex w-full items-center justify-between gap-3 border-4 border-merry-forest bg-merry-oat px-5 py-4 transition-colors hover:bg-merry-cream"
                 >
                   <span className="flex items-center gap-2.5">
-                    <HiOutlineCheckCircle className="w-5 h-5 text-moss shrink-0" />
-                    <span className="text-[13px] tracking-[0.1em] uppercase font-semibold text-ink">
-                      Order History
+                    <HiOutlineCheckCircle className="h-5 w-5 shrink-0 text-merry-clay" strokeWidth={2} />
+                    <span className="font-slab text-[12px] uppercase tracking-widest2 text-merry-forest">
+                      Order history
                     </span>
-                    <span className="text-[12.5px] text-ink/45">
+                    <span className="text-[12px] font-medium text-merry-forest/45">
                       ({history.length} completed)
                     </span>
                   </span>
                   <HiOutlineChevronDown
-                    className={`w-4 h-4 shrink-0 text-ink/50 transition-transform duration-300 ${
+                    className={`h-5 w-5 shrink-0 text-merry-forest transition-transform duration-300 ${
                       historyOpen ? "rotate-180" : ""
                     }`}
+                    strokeWidth={2.4}
                   />
                 </button>
 
                 {historyOpen && (
-                  <div className="space-y-4 mt-4">
+                  <div className="mt-5 space-y-5">
                     {history.map((order) => (
                       <OrderCard key={order._id} order={order} />
                     ))}

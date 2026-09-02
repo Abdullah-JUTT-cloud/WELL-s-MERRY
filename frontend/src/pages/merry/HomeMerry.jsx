@@ -6,6 +6,8 @@ import {
   MagneticProductCard,
   PinnedFeatures,
   WavyDivider,
+  RealResultsBanner,
+  IngredientSpotlight,
   LeafIcon,
 } from "../../components/merry/index.js";
 import {
@@ -13,6 +15,7 @@ import {
   HOME_FEATURES,
   HERO_MARQUEE_ITEMS,
   SHOP_MARQUEE_ITEMS,
+  MERRY_REVIEW_SNIPPETS,
 } from "../../data/merry/mock.js";
 import bottleAmber from "../../assets/apoc/bottle-amber.jpg";
 import bottleRust from "../../assets/apoc/bottle-rust.jpg";
@@ -236,7 +239,10 @@ const Hero = () => {
 };
 
 const Home = () => {
-  const lineup = MERRY_PRODUCTS.slice(0, 6);
+  /* Eight cards = two clean rows of four on lg, two of two on md, so the
+     grid never ends in a half-empty row (six items across four columns
+     was what left the awkward gaps). */
+  const lineup = MERRY_PRODUCTS.slice(0, 8);
 
   return (
     <>
@@ -275,9 +281,19 @@ const Home = () => {
             </Link>
           </div>
 
-          <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
+          {/* Bento grid — 1 / 2 / 4 columns.
+              `auto-rows-fr` + `items-stretch` force every row to a single
+              shared height and every card to fill its cell completely, so
+              the images (h-full w-full object-cover inside the card) cover
+              their boxes with no dead space or ragged bottoms. */}
+          <div className="mt-12 grid auto-rows-fr grid-cols-1 items-stretch gap-6 md:grid-cols-2 lg:grid-cols-4 lg:gap-8">
             {lineup.map((product, i) => (
-              <MagneticProductCard key={product._id} product={product} strength={i % 2 ? 14 : 10} />
+              <MagneticProductCard
+                key={product._id}
+                product={product}
+                strength={i % 2 ? 14 : 10}
+                className="w-full"
+              />
             ))}
           </div>
         </div>
@@ -303,8 +319,16 @@ const Home = () => {
         features={HOME_FEATURES}
       />
 
+      {/* Flow 5 — TRUST BLOCK A: social proof.
+          Dark forest band, counter-scrolling 5-star review marquees. */}
+      <RealResultsBanner reviews={MERRY_REVIEW_SNIPPETS} rating="4.9" reviewCount={231} />
+
+      {/* Flow 6 — TRUST BLOCK B: ingredient transparency.
+          Macro image left, "NO SECRETS. JUST SCIENCE." + 2×2 proof grid right. */}
+      <IngredientSpotlight />
+
       {/* Hand-off into the footer's clay newsletter band */}
-      <WavyDivider from="cream" to="clay" variant="swell" />
+      <WavyDivider from="oat" to="clay" variant="swell" />
     </>
   );
 };

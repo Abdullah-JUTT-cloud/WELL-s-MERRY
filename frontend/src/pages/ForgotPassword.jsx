@@ -1,9 +1,14 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext.jsx";
-import FormField from "../components/FormField.jsx";
-import logo from "../assets/nav-up.png";
+import AuthLayout from "../components/merry/AuthLayout.jsx";
+import {
+  AuthField,
+  AuthSubmit,
+  AuthAlert,
+  AuthSwitch,
+} from "../components/merry/AuthForm.jsx";
 
 const ForgotPassword = () => {
   const { forgotPassword, resetPassword } = useAuth();
@@ -73,22 +78,37 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="container-content py-16 sm:py-24 max-w-md mx-auto">
-      <div className="text-center mb-10">
-        <img src={logo} alt="Well's Merry" className="h-14 w-auto mx-auto mb-6 rounded-md" />
-        <h1 className="font-display text-3xl mb-2">
-          {step === 1 ? "Forgot Password" : "Reset Password"}
-        </h1>
-        <p className="text-ink/55 text-sm">
-          {step === 1
-            ? "Enter your email and we'll send you a reset code"
-            : "Enter the code we sent you and choose a new password"}
-        </p>
-      </div>
-
+    <AuthLayout
+      eyebrow={step === 1 ? "Password recovery" : "Step 2 of 2"}
+      title={
+        step === 1 ? (
+          <>
+            Forgot
+            <br />
+            your <span className="text-merry-clay">password?</span>
+          </>
+        ) : (
+          <>
+            Reset
+            <br />
+            your <span className="text-merry-clay">password.</span>
+          </>
+        )
+      }
+      subtitle={
+        step === 1
+          ? "Enter the email on your account and we'll send a 6-digit reset code."
+          : "Enter the code we just emailed you, then choose a new password."
+      }
+      quote={{
+        text: "Roots run deep. Passwords, less so.",
+        author: "We'll get you back in",
+      }}
+      footer={<AuthSwitch prompt="Remembered your password?" to="/login" cta="Log in" />}
+    >
       {step === 1 ? (
-        <form onSubmit={handleRequestCode} className="space-y-5">
-          <FormField
+        <form onSubmit={handleRequestCode} className="space-y-6">
+          <AuthField
             label="Email"
             name="email"
             type="email"
@@ -99,22 +119,20 @@ const ForgotPassword = () => {
             }}
             error={errors.email}
             autoComplete="email"
+            placeholder="you@email.com"
           />
-          <button type="submit" disabled={submitting} className="btn btn-dark w-full">
-            {submitting ? "Sending..." : "Send Reset Code"}
-          </button>
+          <AuthSubmit loading={submitting} loadingLabel="Sending…">
+            Send reset code
+          </AuthSubmit>
         </form>
       ) : (
-        <form onSubmit={handleResetPassword} className="space-y-5">
-          {errors.form && (
-            <div className="bg-red-50 border border-red-200 text-red-600 text-[13px] px-4 py-3 rounded-sm">
-              {errors.form}
-            </div>
-          )}
+        <form onSubmit={handleResetPassword} className="space-y-6">
+          <AuthAlert>{errors.form}</AuthAlert>
 
-          <FormField
-            label="6-Digit Code"
+          <AuthField
+            label="6-digit code"
             name="otp"
+            inputMode="numeric"
             value={otp}
             onChange={(e) => {
               setOtp(e.target.value.replace(/\D/g, "").slice(0, 6));
@@ -123,8 +141,8 @@ const ForgotPassword = () => {
             error={errors.otp}
             placeholder="000000"
           />
-          <FormField
-            label="New Password"
+          <AuthField
+            label="New password"
             name="newPassword"
             type="password"
             value={newPassword}
@@ -134,9 +152,10 @@ const ForgotPassword = () => {
             }}
             error={errors.newPassword}
             autoComplete="new-password"
+            placeholder="Min. 6 characters"
           />
-          <FormField
-            label="Confirm New Password"
+          <AuthField
+            label="Confirm new password"
             name="confirmPassword"
             type="password"
             value={confirmPassword}
@@ -146,27 +165,23 @@ const ForgotPassword = () => {
             }}
             error={errors.confirmPassword}
             autoComplete="new-password"
+            placeholder="Repeat it"
           />
 
-          <button type="submit" disabled={submitting} className="btn btn-dark w-full">
-            {submitting ? "Resetting..." : "Reset Password"}
-          </button>
+          <AuthSubmit loading={submitting} loadingLabel="Resetting…">
+            Reset password
+          </AuthSubmit>
 
           <button
             type="button"
             onClick={() => setStep(1)}
-            className="text-[12.5px] text-ink/50 hover:text-ink w-full text-center"
+            className="w-full text-center font-slab text-[11px] uppercase tracking-widest2 text-merry-forest/55 underline decoration-2 underline-offset-4 hover:text-merry-clay"
           >
             &larr; Use a different email
           </button>
         </form>
       )}
-
-      <p className="text-center text-[13.5px] text-ink/55 mt-8">
-        Remembered your password?{" "}
-        <Link to="/login" className="text-gold-1 hover:text-ink font-medium">Log in</Link>
-      </p>
-    </div>
+    </AuthLayout>
   );
 };
 

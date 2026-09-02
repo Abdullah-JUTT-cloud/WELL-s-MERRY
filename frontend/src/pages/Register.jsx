@@ -1,9 +1,16 @@
 import { useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext.jsx";
-import FormField from "../components/FormField.jsx";
-import logo from "../assets/nav-up.png";
+import AuthLayout from "../components/merry/AuthLayout.jsx";
+import {
+  AuthField,
+  AuthSubmit,
+  AuthAlert,
+  AuthDivider,
+  AuthGhostLink,
+  AuthSwitch,
+} from "../components/merry/AuthForm.jsx";
 
 const EMPTY_FORM = {
   name: "", email: "", phone: "", password: "", confirmPassword: "",
@@ -71,60 +78,131 @@ const Register = () => {
     }
   };
 
+  const suffix = redirectTo !== "/" ? `?redirect=${encodeURIComponent(redirectTo)}` : "";
+
   return (
-    <div className="container-content py-16 sm:py-24 max-w-md mx-auto">
-      <div className="text-center mb-10">
-        <img src={logo} alt="Well's Merry" className="h-14 w-auto mx-auto mb-6 rounded-md" />
-        <h1 className="font-display text-3xl mb-2">Create Your Account</h1>
-        <p className="text-ink/55 text-sm">Join Well's Merry for faster checkout and order tracking</p>
-      </div>
+    <AuthLayout
+      eyebrow="Join the grove"
+      title={
+        <>
+          Create
+          <br />
+          your <span className="text-merry-clay">account.</span>
+        </>
+      }
+      subtitle="Faster checkout, live order tracking and first dibs on every new batch."
+      quote={{
+        text: "Small batches. Real ingredients. Delivered to your door.",
+        author: "Cash on delivery, nationwide",
+      }}
+      footer={
+        <div className="space-y-8">
+          <AuthSwitch prompt="Already have an account?" to={`/login${suffix}`} cta="Log in" />
+          <AuthDivider label="or continue as guest" />
+          <AuthGhostLink to="/shop">Browse without an account</AuthGhostLink>
+        </div>
+      }
+    >
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <AuthAlert>{errors.form}</AuthAlert>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
-        {errors.form && (
-          <div className="bg-red-50 border border-red-200 text-red-600 text-[13px] px-4 py-3 rounded-sm">
-            {errors.form}
-          </div>
-        )}
+        <AuthField
+          label="Full name"
+          name="name"
+          value={form.name}
+          onChange={handleChange}
+          error={errors.name}
+          autoComplete="name"
+          placeholder="Your name"
+        />
+        <AuthField
+          label="Email"
+          name="email"
+          type="email"
+          value={form.email}
+          onChange={handleChange}
+          error={errors.email}
+          autoComplete="email"
+          placeholder="you@email.com"
+        />
+        <AuthField
+          label="Phone number"
+          hint="Optional"
+          name="phone"
+          value={form.phone}
+          onChange={handleChange}
+          error={errors.phone}
+          placeholder="03XX XXXXXXX"
+          autoComplete="tel"
+        />
 
-        <FormField label="Full Name" name="name" value={form.name} onChange={handleChange} error={errors.name} autoComplete="name" />
-        <FormField label="Email" name="email" type="email" value={form.email} onChange={handleChange} error={errors.email} autoComplete="email" />
-        <FormField label="Phone Number (optional)" name="phone" value={form.phone} onChange={handleChange} error={errors.phone} placeholder="03XX XXXXXXX" autoComplete="tel" />
-        <FormField label="Password" name="password" type="password" value={form.password} onChange={handleChange} error={errors.password} autoComplete="new-password" />
-        <FormField label="Confirm Password" name="confirmPassword" type="password" value={form.confirmPassword} onChange={handleChange} error={errors.confirmPassword} autoComplete="new-password" />
+        <div className="grid gap-6 sm:grid-cols-2">
+          <AuthField
+            label="Password"
+            name="password"
+            type="password"
+            value={form.password}
+            onChange={handleChange}
+            error={errors.password}
+            autoComplete="new-password"
+            placeholder="Min. 6 characters"
+          />
+          <AuthField
+            label="Confirm"
+            name="confirmPassword"
+            type="password"
+            value={form.confirmPassword}
+            onChange={handleChange}
+            error={errors.confirmPassword}
+            autoComplete="new-password"
+            placeholder="Repeat it"
+          />
+        </div>
 
-        <div className="pt-2">
-          <p className="text-[12px] tracking-[0.08em] uppercase text-ink/50 mb-4 font-medium">Home / Delivery Address</p>
-          <div className="space-y-4">
-            <FormField label="Street Address*" name="street" value={form.street} onChange={handleChange} error={errors.street} autoComplete="street-address" placeholder="House #, Street, Area" />
-            <div className="grid grid-cols-2 gap-4">
-              <FormField label="City*" name="city" value={form.city} onChange={handleChange} error={errors.city} autoComplete="address-level2" />
-              <FormField label="Postal Code" name="postalCode" value={form.postalCode} onChange={handleChange} autoComplete="postal-code" />
+        {/* Delivery address — blocked off with a heavy rule so the form
+            reads as two deliberate chunks rather than one long scroll. */}
+        <div className="border-t-4 border-merry-forest/15 pt-6">
+          <p className="mb-5 font-slab text-[11px] uppercase tracking-widest2 text-merry-clay">
+            Home / delivery address
+          </p>
+          <div className="space-y-6">
+            <AuthField
+              label="Street address"
+              name="street"
+              value={form.street}
+              onChange={handleChange}
+              error={errors.street}
+              autoComplete="street-address"
+              placeholder="House #, street, area"
+            />
+            <div className="grid gap-6 sm:grid-cols-2">
+              <AuthField
+                label="City"
+                name="city"
+                value={form.city}
+                onChange={handleChange}
+                error={errors.city}
+                autoComplete="address-level2"
+                placeholder="Lahore"
+              />
+              <AuthField
+                label="Postal code"
+                hint="Optional"
+                name="postalCode"
+                value={form.postalCode}
+                onChange={handleChange}
+                autoComplete="postal-code"
+                placeholder="54000"
+              />
             </div>
           </div>
         </div>
 
-        <button type="submit" disabled={submitting} className="btn btn-dark w-full">
-          {submitting ? "Creating Account..." : "Create Account"}
-        </button>
+        <AuthSubmit loading={submitting} loadingLabel="Creating account…">
+          Create account
+        </AuthSubmit>
       </form>
-
-      <p className="text-center text-[13.5px] text-ink/55 mt-8">
-        Already have an account?{" "}
-        <Link to={`/login${redirectTo !== "/" ? `?redirect=${encodeURIComponent(redirectTo)}` : ""}`} className="text-gold-1 hover:text-ink font-medium">
-          Log in
-        </Link>
-      </p>
-
-      <div className="flex items-center gap-4 my-8">
-        <div className="flex-1 h-px bg-cream-dim" />
-        <span className="text-[11px] tracking-[0.1em] uppercase text-ink/35">or continue as guest</span>
-        <div className="flex-1 h-px bg-cream-dim" />
-      </div>
-
-      <Link to="/shop" className="btn btn-outline w-full">
-        Browse Without an Account
-      </Link>
-    </div>
+    </AuthLayout>
   );
 };
 

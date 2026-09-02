@@ -633,3 +633,22 @@ export const SHOP_MARQUEE_ITEMS = [
   "Refills save 15%",
   "Not sure? Take the quiz",
 ];
+
+/* ---------------------------------------------------------------------
+   REAL RESULTS — short, punchy 5-star review snippets for the social
+   proof marquee on the homepage (components/merry/RealResultsBanner).
+   Deliberately one-liners: the band scrolls, so anything longer than a
+   breath is unreadable at speed.
+   --------------------------------------------------------------------- */
+export const MERRY_REVIEW_SNIPPETS = [
+  { quote: "Saved my hairline.", author: "Ahmed" },
+  { quote: "Zero frizz, finally.", author: "Sara" },
+  { quote: "Baby hairs are back.", author: "Hina" },
+  { quote: "My barber asked what I use.", author: "Bilal" },
+  { quote: "Shedding stopped in 3 weeks.", author: "Mahnoor" },
+  { quote: "Smells like a real kitchen.", author: "Usman" },
+  { quote: "No greasy pillow. At last.", author: "Zoya" },
+  { quote: "Dandruff gone by week two.", author: "Faisal" },
+  { quote: "Two bottles in. No going back.", author: "Areeba" },
+  { quote: "Softest my hair has ever been.", author: "Danish" },
+];

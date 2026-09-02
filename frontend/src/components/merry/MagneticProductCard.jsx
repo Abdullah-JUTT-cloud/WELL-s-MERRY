@@ -75,7 +75,11 @@ const MagneticProductCard = ({ product, sizes, onAdd, strength = 12, className =
       onBlur={(e) => {
         if (!ref.current?.contains(e.relatedTarget)) setActive(false);
       }}
-      className={`group relative flex flex-col overflow-hidden border-4 border-merry-forest bg-merry-cream shadow-hard-merry transition-shadow duration-200 hover:shadow-hard-merry-clay ${className}`}
+      /* h-full + w-full: the card fills its grid cell edge-to-edge, so a
+         row of cards is one solid band with no dead space between the
+         border and the cell. The image stage below flexes to absorb any
+         extra height the tallest sibling creates. */
+      className={`group relative flex h-full w-full flex-col overflow-hidden border-4 border-merry-forest bg-merry-cream shadow-hard-merry transition-shadow duration-200 hover:shadow-hard-merry-clay ${className}`}
     >
       {product?.badge && (
         <span className="absolute left-3 top-3 z-20 -rotate-3 border-2 border-merry-forest bg-merry-clay px-3 py-1 font-slab text-[11px] uppercase tracking-wider text-merry-cream">
@@ -83,10 +87,14 @@ const MagneticProductCard = ({ product, sizes, onAdd, strength = 12, className =
         </span>
       )}
 
-      {/* Bottle stage — the aggressive scale + Y-lift on hover */}
+      {/* Bottle stage — the aggressive scale + Y-lift on hover.
+          `flex-1` lets the stage grow to fill whatever height the grid
+          row settles on (aspect-[4/5] is the minimum), and the image is
+          absolutely positioned so it always covers that box completely
+          — no letterboxing, no cream gutters inside the frame. */}
       <Link
         to={product?.slug ? `/product/${product.slug}` : "/shop"}
-        className="relative block aspect-[4/5] overflow-hidden border-b-4 border-merry-forest bg-merry-oat"
+        className="relative block w-full flex-1 aspect-[4/5] overflow-hidden border-b-4 border-merry-forest bg-merry-oat"
         aria-label={product?.name}
       >
         {image ? (
@@ -94,13 +102,13 @@ const MagneticProductCard = ({ product, sizes, onAdd, strength = 12, className =
             src={image}
             alt={product?.name || "Hair oil"}
             loading="lazy"
-            className="h-full w-full object-cover"
+            className="absolute inset-0 h-full w-full object-cover"
             animate={active && !reduce ? { scale: 1.12, y: -16 } : { scale: 1, y: 0 }}
             transition={{ type: "spring", stiffness: 220, damping: 18 }}
           />
         ) : (
           <motion.div
-            className="flex h-full w-full items-center justify-center text-merry-forest/20"
+            className="absolute inset-0 flex h-full w-full items-center justify-center text-merry-forest/20"
             animate={active && !reduce ? { scale: 1.12, y: -16 } : { scale: 1, y: 0 }}
             transition={{ type: "spring", stiffness: 220, damping: 18 }}
           >

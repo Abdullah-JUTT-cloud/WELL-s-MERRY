@@ -272,6 +272,18 @@
     );
   }
 
+  /* ---- Merry "press" interaction ---------------------------------------
+     Any element carrying a hard offset shadow (shadow-hard-merry*) slides
+     into that shadow on hover and sits flat on press. Used by the merry
+     CTAs, auth buttons and cart/order actions so the whole organic theme
+     shares one tactile behaviour instead of re-declaring the transform
+     string in every file. */
+  .pressable {
+    @apply transition-[transform,box-shadow] duration-150
+           hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-none
+           active:translate-x-[4px] active:translate-y-[4px] active:shadow-none;
+  }
+
   /* ---- Floating bob animation for ambient botanical elements ----------- */
   .eyebrow {
     @apply block text-[12px] tracking-widest2 uppercase text-gold-1 font-semibold;
