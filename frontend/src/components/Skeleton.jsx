@@ -81,6 +81,34 @@ export const ProductGridSkeleton = ({
 );
 
 /**
+ * Merry product grid — the loading twin of MagneticProductCard.
+ *
+ * Same shell as the real card (4px forest border, 4:5 image stage, name +
+ * price footer) so the homepage lineup and /shop don't jump when the live
+ * inventory lands. Boxier than the legacy grid above on purpose: the merry
+ * design system has no rounded corners.
+ */
+export const MerryProductGridSkeleton = ({
+  count = 8,
+  className = "grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8",
+}) => (
+  <SkeletonRegion label="Loading products" className={className}>
+    {Array.from({ length: count }).map((_, i) => (
+      <div
+        key={i}
+        className="flex flex-col border-4 border-merry-forest bg-merry-cream"
+      >
+        <SkeletonBox className="aspect-[4/5] w-full border-b-4 border-merry-forest" />
+        <div className="space-y-2 p-5">
+          <SkeletonBox className="h-4 w-2/3" />
+          <SkeletonBox className="h-3 w-1/3" />
+        </div>
+      </div>
+    ))}
+  </SkeletonRegion>
+);
+
+/**
  * ProductDetail — gallery on the left, buying panel on the right.
  * Matches the `lg:grid-cols-2` split of the real page.
  */

@@ -1,6 +1,40 @@
 import asyncHandler from "express-async-handler";
+import mongoose from "mongoose";
 import Order from "../models/Order.js";
 import Product from "../models/Product.js";
+
+/* =====================================================================
+   Line-item helpers.
+
+   A cart line only needs to answer two questions: which product, and how
+   many. Everything else (price, name, image, size) is re-read from the
+   database below, so nothing the client sends about the product itself is
+   trusted.
+   ===================================================================== */
+
+/**
+ * The product id a line item was added under.
+ *
+ * Checkout.jsx sends `{ product, qty }`, but the cart stores the id as
+ * `productId` and older/alternative payloads have used `_id` / `id`.
+ * Accepting every spelling means a rename on either side of the wire is a
+ * no-op instead of a checkout outage. Deliberately *not* an allow-list: any
+ * id MongoDB itself minted — i.e. every product an admin creates — passes.
+ */
+const lineProductId = (item) =>
+  item?.product ?? item?.productId ?? item?._id ?? item?.id;
+
+/**
+ * Guard against ids that aren't ObjectIds.
+ *
+ * `Product.findById("merry-p1")` throws a CastError, which the error
+ * handler turns into a 500 — and the shopper reads that as the whole site
+ * being broken when all that happened is a stale id (a cart saved by the
+ * old mock-catalog build, or a hand-edited request). Rejecting it here is
+ * both cheaper and honest: it's a bad request, and the message tells the
+ * shopper exactly how to recover.
+ */
+const isStaleId = (id) => typeof id !== "string" || !mongoose.isValidObjectId(id);
 
 // @desc    Create a new order (works for logged-in users AND guests)
 // @route   POST /api/orders
@@ -21,7 +55,10 @@ export const createOrder = asyncHandler(async (req, res) => {
     throw new Error("Invalid order payload");
   }
 
-  if (!orderItems || orderItems.length === 0) {
+  // A JSON body can carry any shape at all: `orderItems: 5` parses fine and
+  // then explodes on `for (const item of …)` with a TypeError → 500. Anything
+  // that isn't a non-empty array is a malformed cart, not a server fault.
+  if (!Array.isArray(orderItems) || orderItems.length === 0) {
     res.status(400);
     throw new Error("No order items provided");
   }
@@ -81,20 +118,37 @@ export const createOrder = asyncHandler(async (req, res) => {
       throw new Error("Each item quantity must be a positive integer");
     }
 
-    const product = await Product.findById(item.product);
+    const productId = lineProductId(item);
+    if (isStaleId(productId)) {
+      // Not an ObjectId — a leftover from the pre-API mock catalog, or a
+      // hand-made request. 400 with a recovery instruction beats a CastError
+      // 500 or a mystery "Resource not found".
+      res.status(400);
+      throw new Error(
+        "One of the items in your cart is no longer in our catalogue. Please remove it and add it again from the shop."
+      );
+    }
+
+    const product = await Product.findById(productId);
     if (!product || !product.isActive) {
       res.status(404);
-      throw new Error(`Product not found: ${item.product}`);
+      throw new Error(
+        `We couldn't find one of the items in your cart (${productId}). Please remove it and add it again from the shop.`
+      );
     }
     if (product.stock < qty) {
       res.status(400);
       throw new Error(`Not enough stock for ${product.name}`);
     }
 
+    // `product._id` is the real MongoDB ObjectId — it is what Mongoose casts
+    // into orderItems[].product and what every later lookup
+    // (reviews, stock restore on cancellation) joins on. Never echo back the
+    // client's id string; store the one the database just handed us.
     verifiedItems.push({
       product: product._id,
       name: product.name,
-      image: product.images[0],
+      image: product.images?.[0] ?? "",
       price: product.price,
       size: product.size,
       qty,

@@ -70,6 +70,16 @@ test("body-parser runs before the routes (req.body is populated)", async () => {
   assert.match(body.message, /JSON/i);
 });
 
+test("a malformed orderItems payload 400s instead of crashing the route", async () => {
+  // `orderItems: 5` is valid JSON but not a cart. It used to reach the
+  // `for (const item of orderItems)` loop and throw a TypeError → 500.
+  const res = await postJson("/api/orders", JSON.stringify({ orderItems: 5 }));
+
+  assert.equal(res.status, 400);
+  const body = await res.json();
+  assert.match(body.message, /No order items provided/);
+});
+
 test("unknown paths still 404 with the standard message", async () => {
   const res = await postJson("/api/definitely-not-a-route", "{}");
 

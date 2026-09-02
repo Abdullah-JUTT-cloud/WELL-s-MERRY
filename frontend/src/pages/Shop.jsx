@@ -109,8 +109,16 @@ const Shop = () => {
             </button>
           </div>
         ) : products.length === 0 ? (
+          /* Empty is a real answer now: the API replied, the shelf is just
+             bare. It is NOT an excuse to render placeholder products —
+             those can't be ordered. */
           <div className="text-center py-16">
-            <p className="text-ink/60 font-light text-base sm:text-lg">No products found in this category yet.</p>
+            <p className="text-ink/70 font-display text-2xl sm:text-3xl">New batches coming soon...</p>
+            <p className="text-ink/50 font-light mt-3 text-sm sm:text-base">
+              {activeCategory
+                ? "Nothing in this category yet — try another filter."
+                : "The next cold-pressed batch lands here the moment it's bottled."}
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-3 sm:gap-x-7 gap-y-8 sm:gap-y-12">

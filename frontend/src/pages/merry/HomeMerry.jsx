@@ -15,12 +15,13 @@ import {
   LeafIcon,
 } from "../../components/merry/index.js";
 import {
-  MERRY_PRODUCTS,
   HOME_FEATURES,
   HERO_MARQUEE_ITEMS,
   SHOP_MARQUEE_ITEMS,
   MERRY_REVIEW_SNIPPETS,
 } from "../../data/merry/mock.js";
+import { MerryProductGridSkeleton } from "../../components/Skeleton.jsx";
+import { useProducts } from "../../hooks/useProducts.js";
 import bottleAmber from "../../assets/apoc/bottle-amber.jpg";
 import bottleRust from "../../assets/apoc/bottle-rust.jpg";
 import bottleDropper from "../../assets/apoc/bottle-dropper.jpg";
@@ -255,10 +256,16 @@ const Hero = () => {
 };
 
 const Home = () => {
+  /* Live inventory, straight from GET /api/products — the homepage lineup
+     and /shop are two views of the same catalogue now, so a product an
+     admin adds is on the shelf immediately and, crucially, carries the
+     MongoDB _id checkout needs. */
+  const { products, loading } = useProducts();
+
   /* Eight cards = two clean rows of four on lg, two of two on md, so the
      grid never ends in a half-empty row (six items across four columns
      was what left the awkward gaps). */
-  const lineup = MERRY_PRODUCTS.slice(0, 8);
+  const lineup = products.slice(0, 8);
 
   return (
     <>
@@ -292,7 +299,7 @@ const Home = () => {
               to="/shop"
               className="group inline-flex w-fit items-center gap-2 border-b-4 border-merry-clay pb-1 font-slab text-sm uppercase tracking-wide text-merry-forest transition-colors hover:text-merry-clay"
             >
-              View all nine potions
+              View the full shelf
               <span className="transition-transform duration-200 group-hover:translate-x-1.5">→</span>
             </Link>
           </div>
@@ -302,16 +309,35 @@ const Home = () => {
               shared height and every card to fill its cell completely, so
               the images (h-full w-full object-cover inside the card) cover
               their boxes with no dead space or ragged bottoms. */}
-          <div className="mt-12 grid auto-rows-fr grid-cols-1 items-stretch gap-6 md:grid-cols-2 lg:grid-cols-4 lg:gap-8">
-            {lineup.map((product, i) => (
-              <MagneticProductCard
-                key={product._id}
-                product={product}
-                strength={i % 2 ? 14 : 10}
-                className="w-full"
-              />
-            ))}
-          </div>
+          {loading ? (
+            <MerryProductGridSkeleton
+              count={8}
+              className="mt-12 grid auto-rows-fr grid-cols-1 items-stretch gap-6 md:grid-cols-2 lg:grid-cols-4 lg:gap-8"
+            />
+          ) : lineup.length === 0 ? (
+            <div className="mt-12 border-4 border-merry-forest bg-merry-oat p-10 text-center sm:p-16">
+              <p className="font-slab text-3xl uppercase leading-tight sm:text-5xl">
+                New batches
+                <br />
+                <span className="text-merry-clay">coming soon...</span>
+              </p>
+              <p className="mx-auto mt-5 max-w-md text-sm font-medium text-merry-forest/70 sm:text-base">
+                The copper pot is working. Our next cold-pressed batch lands
+                here the moment it's bottled.
+              </p>
+            </div>
+          ) : (
+            <div className="mt-12 grid auto-rows-fr grid-cols-1 items-stretch gap-6 md:grid-cols-2 lg:grid-cols-4 lg:gap-8">
+              {lineup.map((product, i) => (
+                <MagneticProductCard
+                  key={product._id}
+                  product={product}
+                  strength={i % 2 ? 14 : 10}
+                  className="w-full"
+                />
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

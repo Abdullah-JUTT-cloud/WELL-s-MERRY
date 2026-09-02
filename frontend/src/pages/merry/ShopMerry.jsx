@@ -3,12 +3,19 @@ import { Link } from "react-router-dom";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { HiArrowRight } from "react-icons/hi2";
 import { MagneticProductCard, InfiniteMarquee, LeafIcon, SparkIcon } from "../../components/merry/index.js";
-import { MERRY_PRODUCTS, SHOP_MARQUEE_ITEMS } from "../../data/merry/mock.js";
+import { SHOP_MARQUEE_ITEMS } from "../../data/merry/mock.js";
+import { MerryProductGridSkeleton } from "../../components/Skeleton.jsx";
+import { useProducts } from "../../hooks/useProducts.js";
 
 /* =====================================================================
    SHOP — banner with floating organic shapes + a giant "TAKE THE HAIR
    QUIZ" button, then chunky filter tabs (All / Hair Care / Skin Care)
    over a responsive grid of MagneticProductCards.
+
+   Inventory comes from GET /api/products — the same collection the admin
+   panel writes to. The grid used to render a hardcoded catalog, so the
+   shop sold `_id`s that existed in no database and checkout died with
+   "Resource not found".
    ===================================================================== */
 
 const FILTERS = [
@@ -31,15 +38,72 @@ const BannerBlob = ({ className = "", delay = 0, drift = 18 }) => {
   );
 };
 
+/* Shown when the request fails. The grid is empty but the shop is still
+   navigable — and the copy tells the shopper why, instead of silently
+   serving products that can't be ordered. */
+const InventoryError = ({ onRetry }) => (
+  <div className="border-4 border-merry-forest bg-merry-oat p-8 text-center sm:p-12">
+    <LeafIcon className="mx-auto h-10 w-10 -rotate-12 text-merry-clay" />
+    <p className="mt-4 font-slab text-lg uppercase sm:text-xl">
+      The shelf didn't load
+    </p>
+    <p className="mx-auto mt-2 max-w-md text-sm font-medium text-merry-forest/70">
+      We couldn't reach the store inventory. Check your connection and try
+      again — nothing has been added to your cart.
+    </p>
+    <button
+      type="button"
+      onClick={onRetry}
+      className="pressable mt-6 inline-flex items-center gap-2 border-4 border-merry-forest bg-merry-cream px-6 py-3 font-slab text-sm uppercase tracking-wide text-merry-forest shadow-hard-merry-sm hover:bg-merry-cream"
+    >
+      Try again
+    </button>
+  </div>
+);
+
+/* ShopMerry's empty state: the API answered, the catalogue is simply empty
+   (or has nothing in the selected category yet). */
+const EmptyShelf = ({ filtered }) => (
+  <div className="border-4 border-merry-forest bg-merry-oat p-10 text-center sm:p-16">
+    <p className="font-slab text-3xl uppercase leading-tight sm:text-5xl">
+      New batches
+      <br />
+      <span className="text-merry-clay">coming soon...</span>
+    </p>
+    <p className="mx-auto mt-5 max-w-md text-sm font-medium text-merry-forest/70 sm:text-base">
+      {filtered
+        ? "Nothing in this category yet — try another filter, or take the quiz and we'll pick for you."
+        : "The copper pot is working. Our next cold-pressed batch lands here the moment it's bottled."}
+    </p>
+    <Link
+      to="/quiz"
+      className="pressable mt-8 inline-flex items-center gap-3 border-4 border-merry-forest bg-merry-clay px-7 py-3.5 font-slab text-sm uppercase tracking-wide text-merry-cream shadow-hard-merry"
+    >
+      <SparkIcon className="h-4 w-4" />
+      Take the hair quiz
+    </Link>
+  </div>
+);
+
 const Shop = () => {
   const [filter, setFilter] = useState("all");
+
+  // Live inventory. Fetched once on mount; the filter tabs below are a
+  // client-side view over the same array, so switching tabs is instant
+  // (and never refetches the whole catalogue).
+  const {
+    products: inventory,
+    loading,
+    error,
+    refetch,
+  } = useProducts();
 
   const products = useMemo(
     () =>
       filter === "all"
-        ? MERRY_PRODUCTS
-        : MERRY_PRODUCTS.filter((p) => p.category === filter),
-    [filter]
+        ? inventory
+        : inventory.filter((p) => p.category === filter),
+    [inventory, filter]
   );
 
   return (
@@ -59,7 +123,7 @@ const Shop = () => {
               The whole shelf
             </p>
             <h1 className="mt-5 text-5xl uppercase leading-[0.95] sm:text-7xl lg:text-8xl">
-              Nine potions.
+              Every potion.
               <br />
               <span className="text-merry-clay">Zero chemicals.</span>
             </h1>
@@ -117,8 +181,13 @@ const Shop = () => {
               );
             })}
           </div>
-          <p className="font-slab text-xs uppercase tracking-widest2 text-merry-forest/60 sm:text-sm">
-            {products.length} {products.length === 1 ? "potion" : "potions"}
+          <p
+            aria-live="polite"
+            className="font-slab text-xs uppercase tracking-widest2 text-merry-forest/60 sm:text-sm"
+          >
+            {loading
+              ? "Loading the shelf…"
+              : `${products.length} ${products.length === 1 ? "potion" : "potions"}`}
           </p>
         </div>
       </section>
@@ -126,22 +195,35 @@ const Shop = () => {
       {/* ── Product grid: 1 col mobile → 3 col desktop ───────────────── */}
       <section className="bg-merry-cream px-6 pb-20 pt-8 sm:px-10 lg:pb-28">
         <div className="mx-auto max-w-[1440px]">
-          <motion.div layout className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
-            <AnimatePresence mode="popLayout">
-              {products.map((product) => (
-                <motion.div
-                  layout
-                  key={product._id}
-                  initial={{ opacity: 0, y: 28, scale: 0.97 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.96 }}
-                  transition={{ type: "spring", stiffness: 180, damping: 22 }}
-                >
-                  <MagneticProductCard product={product} className="h-full" />
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </motion.div>
+          {loading ? (
+            /* Mirrors the real grid's columns/gaps so the cards land exactly
+               where the placeholders were. */
+            <MerryProductGridSkeleton
+              count={6}
+              className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8"
+            />
+          ) : error ? (
+            <InventoryError onRetry={refetch} />
+          ) : products.length === 0 ? (
+            <EmptyShelf filtered={filter !== "all"} />
+          ) : (
+            <motion.div layout className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
+              <AnimatePresence mode="popLayout">
+                {products.map((product) => (
+                  <motion.div
+                    layout
+                    key={product._id}
+                    initial={{ opacity: 0, y: 28, scale: 0.97 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.96 }}
+                    transition={{ type: "spring", stiffness: 180, damping: 22 }}
+                  >
+                    <MagneticProductCard product={product} className="h-full" />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </motion.div>
+          )}
         </div>
       </section>
 

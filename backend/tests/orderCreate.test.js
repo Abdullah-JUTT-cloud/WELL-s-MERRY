@@ -18,8 +18,10 @@ import assert from "node:assert/strict";
 
 process.env.NODE_ENV ??= "test";
 
+// A real 24-char ObjectId, like the one Mongo mints for every product an
+// admin creates through /api/admin/products.
 const PRODUCT = {
-  _id: "p1",
+  _id: "64f1a2b3c4d5e6f7a8b9c0d1",
   name: "Rosemary Oil",
   price: 2500,
   stock: 5,
@@ -27,6 +29,10 @@ const PRODUCT = {
   images: ["https://res.cloudinary.test/rosemary.jpg"],
   isActive: true,
 };
+
+// The pre-API catalog shipped hardcoded ids like this one. Carts saved by
+// that build still hold them, so checkout has to reject them cleanly.
+const STALE_MOCK_ID = "merry-p1";
 
 const state = { created: [], deleted: [] };
 
@@ -134,4 +140,57 @@ test("an unknown payment method is rejected", { skip: SKIP }, async () => {
 
   assert.equal(res.status, 400);
   assert.match((await res.json()).message, /Invalid payment method/);
+});
+
+test("the stored line item keeps the real MongoDB product id", { skip: SKIP }, async () => {
+  const res = await postOrder("/api/orders", validPayload());
+  const order = await res.json();
+
+  assert.equal(res.status, 201, JSON.stringify(order));
+  assert.equal(order.orderItems[0].product, PRODUCT._id, "ObjectId preserved, not the client's string");
+  assert.equal(order.orderItems[0].image, PRODUCT.images[0], "image snapshotted from the DB");
+});
+
+test("a line item keyed `productId` is accepted too", { skip: SKIP }, async () => {
+  // The cart stores the id as `productId`; the payload contract must not
+  // depend on which spelling a client happens to serialise.
+  const payload = validPayload();
+  payload.orderItems = [{ productId: PRODUCT._id, qty: 1 }];
+
+  const res = await postOrder("/api/orders", payload);
+  const order = await res.json();
+
+  assert.equal(res.status, 201, JSON.stringify(order));
+  assert.equal(order.orderItems[0].product, PRODUCT._id);
+});
+
+test("a stale mock-catalog id is rejected as a 400, not a 500", { skip: SKIP }, async () => {
+  // The bug: a cart saved by the hardcoded-catalog build posts "merry-p1",
+  // findById throws a CastError and the shopper sees a server error.
+  const ordersBefore = state.created.length;
+  const payload = validPayload();
+  payload.orderItems = [{ product: STALE_MOCK_ID, qty: 1 }];
+
+  const res = await postOrder("/api/orders", payload);
+  const body = await res.json();
+
+  assert.equal(res.status, 400, JSON.stringify(body));
+  assert.match(body.message, /no longer in our catalogue/i);
+  assert.equal(state.created.length, ordersBefore, "no order is written for a rejected cart");
+});
+
+test("a product that has sold out is rejected with a stock message", { skip: SKIP }, async () => {
+  const res = await postOrder("/api/orders", { ...validPayload(), orderItems: [{ product: PRODUCT._id, qty: 99 }] });
+  const body = await res.json();
+
+  assert.equal(res.status, 400);
+  assert.match(body.message, /Not enough stock/);
+});
+
+test("a non-array orderItems payload is rejected, not crashed on", { skip: SKIP }, async () => {
+  const res = await postOrder("/api/orders", { ...validPayload(), orderItems: 5 });
+  const body = await res.json();
+
+  assert.equal(res.status, 400, JSON.stringify(body));
+  assert.match(body.message, /No order items provided/);
 });

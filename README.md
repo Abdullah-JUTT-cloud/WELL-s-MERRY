@@ -42,3 +42,5 @@ cd frontend && npm test            # unit + component specs
 ## Notes
 
 - Checkout 404 post-mortem (order route / base-URL mismatch): [`docs/checkout-404-fix.md`](docs/checkout-404-fix.md)
+- Inventory-sync post-mortem (mock catalogue vs. MongoDB — shop sold ids that
+  didn't exist): [`docs/inventory-sync-fix.md`](docs/inventory-sync-fix.md)
