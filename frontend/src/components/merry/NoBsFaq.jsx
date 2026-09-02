@@ -60,18 +60,24 @@ const FaqItem = ({ item, open, onToggle, index }) => {
   const buttonId = `faq-button-${uid}`;
 
   return (
+    /* Accordion item wrapper — a vertical flex stack (flex-col) so the
+       answer panel flows *below* the header in normal document flow and
+       can never overlap it (the previous absolute/offset z-index bug). */
     <div
-      className={`border-4 border-merry-forest transition-colors duration-200
+      className={`flex flex-col border-4 border-merry-forest transition-colors duration-200
         ${open ? "bg-merry-oat" : "bg-merry-cream"}`}
     >
-      <h3>
+      {/* Question header: relative-positioned, fixed minimum height, and
+          justify-between so the number + text sit left and the toggle
+          icon sits right with a stable baseline. */}
+      <h3 className="relative m-0">
         <button
           type="button"
           id={buttonId}
           aria-expanded={open}
           aria-controls={panelId}
           onClick={onToggle}
-          className="group flex w-full items-center gap-4 px-5 py-5 text-left sm:gap-6 sm:px-7 sm:py-6"
+          className="group relative flex min-h-[5.5rem] w-full items-center justify-between gap-4 px-5 py-5 text-left sm:gap-6 sm:px-7 sm:py-6"
         >
           <span className="font-slab text-sm text-merry-clay sm:text-base">
             {String(index + 1).padStart(2, "0")}
@@ -85,6 +91,10 @@ const FaqItem = ({ item, open, onToggle, index }) => {
 
       <AnimatePresence initial={false}>
         {open && (
+          /* Separate block element that slides down *below* the header.
+             overflow-hidden + height:"auto" guarantees it unfurls under
+             the header with no overlap. mt-4 separates the answer text
+             from the question above it. */
           <motion.div
             key="panel"
             id={panelId}
@@ -100,7 +110,7 @@ const FaqItem = ({ item, open, onToggle, index }) => {
             className="overflow-hidden"
           >
             <div className="border-t-4 border-merry-forest px-5 py-5 sm:px-7 sm:py-7">
-              <p className="max-w-2xl text-[15px] leading-relaxed text-merry-forest/80 sm:text-base">
+              <p className="mt-4 max-w-2xl text-[15px] leading-relaxed text-merry-forest/80 sm:text-base">
                 {item.a}
               </p>
             </div>
