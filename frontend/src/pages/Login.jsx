@@ -2,8 +2,15 @@ import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext.jsx";
-import FormField from "../components/FormField.jsx";
-import logo from "../assets/nav-up.png";
+import AuthLayout from "../components/merry/AuthLayout.jsx";
+import {
+  AuthField,
+  AuthSubmit,
+  AuthAlert,
+  AuthDivider,
+  AuthGhostLink,
+  AuthSwitch,
+} from "../components/merry/AuthForm.jsx";
 
 const Login = () => {
   const { login } = useAuth();
@@ -56,22 +63,39 @@ const Login = () => {
     }
   };
 
+  const suffix = redirectTo !== "/" ? `?redirect=${encodeURIComponent(redirectTo)}` : "";
+
   return (
-    <div className="container-content py-16 sm:py-24 max-w-md mx-auto">
-      <div className="text-center mb-10">
-        <img src={logo} alt="Well's Merry" className="h-14 w-auto mx-auto mb-6 rounded-md" />
-        <h1 className="font-display text-3xl mb-2">Welcome Back</h1>
-        <p className="text-ink/55 text-sm">Log in to your Well's Merry account</p>
-      </div>
+    <AuthLayout
+      eyebrow="Members' entrance"
+      title={
+        <>
+          Welcome
+          <br />
+          <span className="text-merry-clay">back.</span>
+        </>
+      }
+      subtitle="Log in to track orders, reorder your ritual and keep your addresses on file."
+      quote={{
+        text: "Your hair remembers what you feed it.",
+        author: "Well's Merry · since 2019",
+      }}
+      footer={
+        <div className="space-y-8">
+          <AuthSwitch
+            prompt="Don't have an account?"
+            to={`/register${suffix}`}
+            cta="Create one"
+          />
+          <AuthDivider label="or continue as guest" />
+          <AuthGhostLink to="/shop">Browse without an account</AuthGhostLink>
+        </div>
+      }
+    >
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <AuthAlert>{errors.form}</AuthAlert>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
-        {errors.form && (
-          <div className="bg-red-50 border border-red-200 text-red-600 text-[13px] px-4 py-3 rounded-sm">
-            {errors.form}
-          </div>
-        )}
-
-        <FormField
+        <AuthField
           label="Email"
           name="email"
           type="email"
@@ -79,8 +103,9 @@ const Login = () => {
           onChange={handleChange}
           error={errors.email}
           autoComplete="email"
+          placeholder="you@email.com"
         />
-        <FormField
+        <AuthField
           label="Password"
           name="password"
           type="password"
@@ -88,36 +113,23 @@ const Login = () => {
           onChange={handleChange}
           error={errors.password}
           autoComplete="current-password"
+          placeholder="••••••••"
         />
 
         <div className="flex justify-end">
-          <Link to="/forgot-password" className="text-[12.5px] text-gold-1 hover:text-ink transition-colors">
+          <Link
+            to="/forgot-password"
+            className="font-slab text-[11px] uppercase tracking-widest2 text-merry-forest/60 underline decoration-2 underline-offset-4 hover:text-merry-clay"
+          >
             Forgot password?
           </Link>
         </div>
 
-        <button type="submit" disabled={submitting} className="btn btn-dark w-full">
-          {submitting ? "Logging In..." : "Log In"}
-        </button>
+        <AuthSubmit loading={submitting} loadingLabel="Logging in…">
+          Log in
+        </AuthSubmit>
       </form>
-
-      <p className="text-center text-[13.5px] text-ink/55 mt-8">
-        Don't have an account?{" "}
-        <Link to={`/register${redirectTo !== "/" ? `?redirect=${encodeURIComponent(redirectTo)}` : ""}`} className="text-gold-1 hover:text-ink font-medium">
-          Create one
-        </Link>
-      </p>
-
-      <div className="flex items-center gap-4 my-8">
-        <div className="flex-1 h-px bg-cream-dim" />
-        <span className="text-[11px] tracking-[0.1em] uppercase text-ink/35">or continue as guest</span>
-        <div className="flex-1 h-px bg-cream-dim" />
-      </div>
-
-      <Link to="/shop" className="btn btn-outline w-full">
-        Browse Without an Account
-      </Link>
-    </div>
+    </AuthLayout>
   );
 };
 

@@ -98,14 +98,32 @@ function App() {
               live API (same data contract as the legacy page, which stays
               registered under /products/:slug for the gold layout). */}
           <Route path="/product/:slug" element={<ProductDetailMerry />} />
+
+          {/* Cart + Track Order — migrated off the legacy gold theme.
+              They now live under MerryLayout so they inherit the organic
+              Navbar, Footer and cart drawer instead of the old shell
+              (which was still rendering the legacy footer). */}
+          <Route path="/cart" element={<Cart />} />
+          <Route element={<ProtectedRoute />}>
+            <Route path="/account/orders" element={<Orders />} />
+          </Route>
         </Route>
+
+        {/* Auth — full-screen 50/50 split (AuthLayout owns its own chrome,
+            so these deliberately sit outside both site layouts). */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/verify-otp" element={<VerifyOtp />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+
+        {/* Convenience alias — "/orders" is what the marketing copy says */}
+        <Route path="/orders" element={<Navigate to="/account/orders" replace />} />
 
         {/* Public site */}
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
           <Route path="/shop" element={<Shop />} />
           <Route path="/products/:slug" element={<ProductDetail />} />
-          <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/order-confirmation/:id" element={<OrderConfirmation />} />
           <Route path="/about" element={<About />} />
@@ -117,13 +135,6 @@ function App() {
               each order's summary, so it deliberately sits outside the
               ProtectedRoute block. */}
           <Route path="/shipping" element={<Shipping />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/verify-otp" element={<VerifyOtp />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route element={<ProtectedRoute />}>
-            <Route path="/account/orders" element={<Orders />} />
-          </Route>
           <Route path="*" element={<ComingSoon label="Page Not Found" />} />
         </Route>
 

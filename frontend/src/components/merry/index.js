@@ -9,6 +9,10 @@
    ===================================================================== */
 
 export { default as MerryLayout } from "./Layout.jsx";
+export { default as AuthLayout } from "./AuthLayout.jsx";
+export * from "./AuthForm.jsx";
+export { default as RealResultsBanner } from "./RealResultsBanner.jsx";
+export { default as IngredientSpotlight } from "./IngredientSpotlight.jsx";
 export { default as Navbar } from "./Navbar.jsx";
 export { default as Footer } from "./Footer.jsx";
 export { default as CartDrawer } from "./CartDrawer.jsx";
