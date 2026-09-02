@@ -33,6 +33,11 @@ export default {
       },
       boxShadow: {
         soft: "0 20px 50px rgba(14,12,8,0.18)",
+        // Neo-brutalist hard-edged offset shadow (no blur)
+        hard: "4px 4px 0 #0e0c08",
+        "hard-sm": "3px 3px 0 #0e0c08",
+        "hard-lg": "6px 6px 0 #0e0c08",
+        "hard-gold": "4px 4px 0 #a9791c",
       },
       backgroundImage: {
         "gold-gradient": "linear-gradient(120deg, #a9791c, #f2d88a 45%, #a9791c)",
