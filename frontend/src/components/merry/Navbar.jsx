@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
-import { Link, NavLink, useLocation } from "react-router-dom";
+import { useCallback, useEffect, useState } from "react";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { HiOutlineShoppingBag, HiBars3, HiXMark } from "react-icons/hi2";
 import { useCart } from "../../context/CartContext.jsx";
+import { useAuth } from "../../context/AuthContext.jsx";
 import { LeafIcon } from "./icons.jsx";
 
 /* =====================================================================
@@ -10,7 +11,7 @@ import { LeafIcon } from "./icons.jsx";
    Left: logo block. Right: cart button (opens the side drawer by setting
    CartContext's `isCartOpen` — no props threaded through the layout) +
    menu toggle that opens a full-screen forest-green overlay with giant
-   staggered links.
+   staggered links, plus Track Order / Login / Sign Up account links.
    ===================================================================== */
 
 const NAV_LINKS = [
@@ -43,10 +44,37 @@ const itemVariants = {
 
 const Navbar = () => {
   const { itemCount, isCartOpen, setIsCartOpen } = useCart();
+  const { isAuthenticated, logout } = useAuth();
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  // Close the overlay on navigation and lock body scroll while it's open.
+  /* Close first, navigate second — same contract as CartDrawer.
+     Relying on a <Link>'s default navigation racing the close left the
+     overlay sitting on top of /login, /register and /orders. */
+  const closeAndGo = useCallback(
+    (to) => (e) => {
+      e.preventDefault();
+      setMenuOpen(false);
+      navigate(to);
+    },
+    [navigate]
+  );
+
+  const closeMenu = useCallback(() => setMenuOpen(false), []);
+
+  const handleLogout = useCallback(
+    async (e) => {
+      e.preventDefault();
+      setMenuOpen(false);
+      await logout();
+      navigate("/");
+    },
+    [logout, navigate]
+  );
+
+  // Safety net: if anything at all changes the route while the overlay is
+  // open, it goes away.
   useEffect(() => setMenuOpen(false), [pathname]);
   useEffect(() => {
     document.body.style.overflow = menuOpen ? "hidden" : "";
@@ -114,6 +142,9 @@ const Navbar = () => {
             animate="open"
             exit="closed"
             className="fixed inset-0 z-[60] flex flex-col overflow-y-auto bg-merry-forest text-merry-cream"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Main menu"
           >
             {/* Overlay top bar mirrors the navbar so the close button lands
                 exactly where the open button was. */}
@@ -126,7 +157,7 @@ const Navbar = () => {
               </span>
               <button
                 type="button"
-                onClick={() => setMenuOpen(false)}
+                onClick={closeMenu}
                 aria-label="Close menu"
                 className={`border-4 border-merry-cream bg-merry-cream p-2 text-merry-forest shadow-hard-merry-clay-sm sm:p-2.5 ${pressable}`}
               >
@@ -139,11 +170,14 @@ const Navbar = () => {
               initial="closed"
               animate="open"
               className="flex flex-1 flex-col justify-center gap-1 px-6 py-10 sm:px-12"
+              aria-label="Primary"
             >
               {NAV_LINKS.map((link, i) => (
                 <motion.div key={link.to} variants={itemVariants} className="overflow-hidden">
                   <NavLink
                     to={link.to}
+                    end={link.to === "/"}
+                    onClick={closeAndGo(link.to)}
                     className={({ isActive }) =>
                       `group flex items-baseline gap-4 font-slab text-4xl uppercase leading-[1.15] transition-colors duration-150 sm:text-6xl lg:text-7xl ${
                         isActive ? "text-merry-clay" : "text-merry-cream hover:text-merry-clay"
@@ -158,6 +192,47 @@ const Navbar = () => {
                   </NavLink>
                 </motion.div>
               ))}
+
+              {/* Account / order links — prominent, directly below the main
+                  pages. Clicking any of them closes this overlay first. */}
+              <motion.div
+                variants={itemVariants}
+                className="mt-8 flex flex-col gap-3 sm:mt-10 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4"
+              >
+                <Link
+                  to="/orders"
+                  onClick={closeAndGo("/orders")}
+                  className={`inline-flex items-center justify-center border-4 border-merry-cream bg-merry-cream px-6 py-3.5 font-slab text-sm uppercase tracking-wide text-merry-forest shadow-hard-merry-clay-sm sm:text-base ${pressable}`}
+                >
+                  Track Order
+                </Link>
+                {isAuthenticated ? (
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className={`inline-flex items-center justify-center border-4 border-merry-cream bg-transparent px-6 py-3.5 font-slab text-sm uppercase tracking-wide text-merry-cream sm:text-base ${pressable}`}
+                  >
+                    Log Out
+                  </button>
+                ) : (
+                  <>
+                    <Link
+                      to="/login"
+                      onClick={closeAndGo("/login")}
+                      className={`inline-flex items-center justify-center border-4 border-merry-cream bg-transparent px-6 py-3.5 font-slab text-sm uppercase tracking-wide text-merry-cream sm:text-base ${pressable}`}
+                    >
+                      Login
+                    </Link>
+                    <Link
+                      to="/register"
+                      onClick={closeAndGo("/register")}
+                      className={`inline-flex items-center justify-center border-4 border-merry-clay bg-merry-clay px-6 py-3.5 font-slab text-sm uppercase tracking-wide text-merry-cream shadow-hard-merry-sm sm:text-base ${pressable}`}
+                    >
+                      Sign Up
+                    </Link>
+                  </>
+                )}
+              </motion.div>
             </motion.nav>
 
             <div className="flex flex-col gap-2 border-t-4 border-merry-cream/15 px-6 py-5 text-xs uppercase tracking-widest2 text-merry-sage sm:flex-row sm:items-center sm:justify-between sm:px-12">

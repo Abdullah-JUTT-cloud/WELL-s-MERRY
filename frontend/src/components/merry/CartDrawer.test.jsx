@@ -3,6 +3,7 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Link, MemoryRouter, Route, Routes } from "react-router-dom";
 import { CartProvider } from "../../context/CartContext.jsx";
+import { AuthProvider } from "../../context/AuthContext.jsx";
 import MerryLayout from "./Layout.jsx";
 
 /* =====================================================================
@@ -31,25 +32,27 @@ const ONE_ITEM = JSON.stringify([
 const renderApp = (initialRoute = "/shop") =>
   render(
     <MemoryRouter initialEntries={[initialRoute]}>
-      <CartProvider>
-        <Routes>
-          <Route element={<MerryLayout />}>
-            <Route
-              path="/shop"
-              element={
-                <div>
-                  SHOP PAGE
-                  {/* Stands in for "navigation from anywhere else" — the
-                      drawer must not survive it. */}
-                  <Link to="/checkout">GO TO CHECKOUT PAGE</Link>
-                </div>
-              }
-            />
-            <Route path="/cart" element={<div>CART PAGE</div>} />
-            <Route path="/checkout" element={<div>CHECKOUT PAGE</div>} />
-          </Route>
-        </Routes>
-      </CartProvider>
+      <AuthProvider>
+        <CartProvider>
+          <Routes>
+            <Route element={<MerryLayout />}>
+              <Route
+                path="/shop"
+                element={
+                  <div>
+                    SHOP PAGE
+                    {/* Stands in for "navigation from anywhere else" — the
+                        drawer must not survive it. */}
+                    <Link to="/checkout">GO TO CHECKOUT PAGE</Link>
+                  </div>
+                }
+              />
+              <Route path="/cart" element={<div>CART PAGE</div>} />
+              <Route path="/checkout" element={<div>CHECKOUT PAGE</div>} />
+            </Route>
+          </Routes>
+        </CartProvider>
+      </AuthProvider>
     </MemoryRouter>
   );
 

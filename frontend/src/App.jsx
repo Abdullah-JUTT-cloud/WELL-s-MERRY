@@ -125,8 +125,10 @@ function App() {
         <Route path="/verify-otp" element={<VerifyOtp />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
 
-        {/* Convenience alias — "/orders" is what the marketing copy says */}
+        {/* Convenience aliases — "/orders" and "/track-order" are what the
+            nav / marketing copy say; both land on the account tracker. */}
         <Route path="/orders" element={<Navigate to="/account/orders" replace />} />
+        <Route path="/track-order" element={<Navigate to="/account/orders" replace />} />
 
         {/* Public site */}
         <Route element={<Layout />}>

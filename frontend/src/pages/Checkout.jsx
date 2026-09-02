@@ -12,6 +12,7 @@ import {
 import { useCart } from "../context/CartContext.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 import { createOrder } from "../api/orders.js";
+import { getAccessToken, readTokenFromStorage } from "../api/tokenStore.js";
 import { buildWhatsAppLink } from "../config/siteConfig.js";
 
 const EMPTY_FORM = {
@@ -200,6 +201,17 @@ const Checkout = () => {
 
     setSubmitting(true);
     try {
+      // Bearer token from memory or localStorage. Sent even for guests (no-op
+      // if missing) so a logged-in shopper is never treated as a guest just
+      // because the interceptor didn't fire.
+      const token = getAccessToken() || readTokenFromStorage();
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+      // Always include guestEmail when we have one. The API ignores it when
+      // a valid token is present, and needs it when the request is a guest
+      // (missing user id must not 500 — see Order schema).
+      const guestEmail = form.email.trim() || undefined;
+
       let payload;
 
       if (paymentMethod === "online") {
@@ -221,10 +233,11 @@ const Checkout = () => {
         payload.append("onlineSenderAccount", onlineSenderAccount.trim());
         payload.append("onlineTransactionAmount", onlineTransactionAmount);
         payload.append("receipt", receiptFile);
-        if (!isAuthenticated) payload.append("guestEmail", form.email);
+        if (guestEmail) payload.append("guestEmail", guestEmail);
         if (form.notes) payload.append("notes", form.notes);
       } else {
-        // Plain JSON for COD
+        // Plain JSON for COD — never send a `user` field; the API takes
+        // ownership from the Bearer token, or treats the order as a guest.
         payload = {
           orderItems: buildOrderItems(),
           shippingAddress: {
@@ -235,16 +248,17 @@ const Checkout = () => {
             postalCode: form.postalCode,
           },
           paymentMethod: "cod",
-          guestEmail: !isAuthenticated ? form.email : undefined,
+          guestEmail,
           notes: form.notes,
         };
       }
 
-      const order = await createOrder(payload);
+      const order = await createOrder(payload, { headers });
       clearCart();
       toast.success("Order placed successfully!");
       navigate(`/order-confirmation/${order._id}`, { state: { order } });
     } catch (err) {
+      console.error(err.response?.data);
       toast.error(err.response?.data?.message || "Couldn't place your order. Please try again.");
     } finally {
       setSubmitting(false);
