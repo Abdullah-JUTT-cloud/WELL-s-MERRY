@@ -126,6 +126,22 @@ export default {
           backgroundColor: "#C17754",
           color: "#F9F6F0",
         },
+        /* Shared neo-brutalist "press" interaction: the element slides
+           into (and erases) its own hard shadow. Pair with any
+           shadow-hard-merry* utility. Used by Navbar and the Merry
+           pages' chunky buttons. */
+        ".pressable": {
+          transitionProperty: "transform, box-shadow",
+          transitionDuration: "150ms",
+          "&:hover": {
+            transform: "translate(3px, 3px)",
+            boxShadow: "none",
+          },
+          "&:active": {
+            transform: "translate(4px, 4px)",
+            boxShadow: "none",
+          },
+        },
       });
     },
   ],

@@ -6,6 +6,15 @@ import Footer from "./components/Footer.jsx";
 import WhatsAppFloat from "./components/WhatsAppFloat.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import { useAdmin } from "./context/AdminContext.jsx";
+import MerryLayout from "./components/merry/Layout.jsx";
+
+/* ── Merry design-system pages (organic theme takeover) ────────────── */
+const HomeMerry = lazy(() => import("./pages/merry/HomeMerry.jsx"));
+const ShopMerry = lazy(() => import("./pages/merry/ShopMerry.jsx"));
+const StoryMerry = lazy(() => import("./pages/merry/StoryMerry.jsx"));
+const QuizMerry = lazy(() => import("./pages/merry/QuizMerry.jsx"));
+const OutletsMerry = lazy(() => import("./pages/merry/OutletsMerry.jsx"));
+const ProductDetailMerry = lazy(() => import("./pages/merry/ProductDetailMerry.jsx"));
 
 const Home = lazy(() => import("./pages/Home.jsx"));
 const Shop = lazy(() => import("./pages/Shop.jsx"));
@@ -77,6 +86,20 @@ function App() {
   return (
     <Suspense fallback={<PageFallback />}>
       <Routes>
+        {/* Merry — the organic theme owns the primary shopping routes.
+            Declared before the gold Layout so these exact paths win. */}
+        <Route element={<MerryLayout />}>
+          <Route path="/" element={<HomeMerry />} />
+          <Route path="/shop" element={<ShopMerry />} />
+          <Route path="/story" element={<StoryMerry />} />
+          <Route path="/quiz" element={<QuizMerry />} />
+          <Route path="/outlets" element={<OutletsMerry />} />
+          {/* PDP — full merry reskin. Serves both the mock catalog and the
+              live API (same data contract as the legacy page, which stays
+              registered under /products/:slug for the gold layout). */}
+          <Route path="/product/:slug" element={<ProductDetailMerry />} />
+        </Route>
+
         {/* Public site */}
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />

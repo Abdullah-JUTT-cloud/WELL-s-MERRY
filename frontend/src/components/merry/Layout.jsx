@@ -1,5 +1,5 @@
-import { useState, useCallback } from "react";
-import { Outlet } from "react-router-dom";
+import { useState, useCallback, useEffect } from "react";
+import { Outlet, useLocation } from "react-router-dom";
 import Navbar from "./Navbar.jsx";
 import Footer from "./Footer.jsx";
 import CartDrawer from "./CartDrawer.jsx";
@@ -23,9 +23,15 @@ import CartDrawer from "./CartDrawer.jsx";
    ===================================================================== */
 const MerryLayout = ({ children }) => {
   const [cartOpen, setCartOpen] = useState(false);
+  const { pathname } = useLocation();
 
   const openCart = useCallback(() => setCartOpen(true), []);
   const closeCart = useCallback(() => setCartOpen(false), []);
+
+  // Fresh pages start at the top — same contract as the gold Layout.
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, [pathname]);
 
   return (
     <div className="theme-merry flex min-h-screen flex-col bg-merry-cream text-merry-forest antialiased">

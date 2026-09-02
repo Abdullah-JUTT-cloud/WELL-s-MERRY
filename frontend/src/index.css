@@ -422,3 +422,127 @@
 body {
   overflow-x: clip;
 }
+
+/* ==========================================================
+   Merry map theme — Leaflet graded to the Forest & Cream
+   palette. The tile grade itself comes from MAP_STYLE.tiles
+   .cssFilter (data/merry/mock.js), applied to the tile pane
+   at runtime; these rules style only the chrome around it:
+   pins, popups, zoom control, attribution.
+   ========================================================== */
+
+/* Leaflet's own `.leaflet-container { background:#ddd }` ships later in
+   the cascade, so match its specificity (+class) to keep the forest
+   base visible whenever tiles are slow or unavailable. */
+.merry-map.leaflet-container {
+  background: #1a2e24;
+  font-family: Archivo, Jost, sans-serif;
+  z-index: 0; /* keep map chrome under sticky nav */
+}
+
+.merry-map .leaflet-control-zoom a {
+  background: #24382c;
+  color: #f9f6f0;
+  border: 2px solid #f9f6f0;
+  border-radius: 0 !important;
+  font-weight: 700;
+}
+.merry-map .leaflet-control-zoom a:hover {
+  background: #c17754;
+}
+
+.merry-map .leaflet-control-attribution,
+.merry-map.leaflet-container .leaflet-control-attribution {
+  background: rgba(26, 46, 36, 0.85) !important;
+  color: #9db4a4;
+  font-size: 10px;
+  padding: 1px 6px;
+}
+.merry-map .leaflet-control-attribution a {
+  color: #9db4a4;
+}
+
+/* Organic clay pin blob */
+.merry-pin {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  background: #c17754;
+  border: 3px solid #f9f6f0;
+  border-radius: 46% 54% 50% 50% / 58% 46% 54% 42%;
+  box-shadow: 4px 4px 0 rgba(15, 12, 9, 0.5);
+  transform: rotate(-8deg);
+  transition:
+    transform 200ms ease,
+    background-color 200ms ease;
+}
+.merry-pin--flagship {
+  background: #a45c3b;
+  border-color: #1a2e24;
+  outline: 3px solid #f9f6f0;
+}
+.merry-pin.is-active,
+.merry-pin:hover {
+  transform: rotate(0deg) scale(1.18);
+  background: #f9f6f0;
+}
+.merry-pin.is-active svg,
+.merry-pin:hover svg {
+  fill: #c17754;
+}
+
+/* Small inline pin used in the map legend */
+.merry-pin--inline {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  box-shadow: none;
+  outline: none;
+}
+.merry-pin--inline.merry-pin--flagship {
+  width: 18px;
+  height: 18px;
+}
+
+/* Popup = cream card with forest border + clay hard shadow */
+.merry-map .leaflet-popup-content-wrapper {
+  background: #f9f6f0;
+  color: #1a2e24;
+  border: 4px solid #1a2e24;
+  border-radius: 0;
+  box-shadow: 6px 6px 0 #c17754;
+}
+.merry-map .leaflet-popup-tip {
+  background: #f9f6f0;
+  border: 3px solid #1a2e24;
+  box-shadow: none;
+}
+.merry-map .leaflet-popup-content {
+  margin: 12px 16px;
+  font-family: Archivo, Jost, sans-serif;
+}
+.merry-popup strong {
+  display: block;
+  font-size: 14px;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+.merry-popup span {
+  display: block;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #54432f;
+}
+.merry-popup em {
+  display: block;
+  margin-top: 4px;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: #c17754;
+}

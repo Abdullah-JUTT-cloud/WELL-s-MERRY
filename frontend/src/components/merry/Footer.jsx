@@ -17,15 +17,15 @@ const LINK_COLUMNS = [
     links: [
       { label: "Hair Care Oil", to: "/shop" },
       { label: "All Products", to: "/shop" },
-      { label: "Track Order", to: "/orders" },
+      { label: "The Hair Quiz", to: "/quiz" },
+      { label: "Track Order", to: "/account/orders" },
       { label: "Cart", to: "/cart" },
     ],
   },
   {
     heading: "Company",
     links: [
-      { label: "Our Story", to: "/about" },
-      { label: "Blog", to: "/blog" },
+      { label: "Our Story", to: "/story" },
       { label: "Outlets", to: "/outlets" },
       { label: "Contact", to: "/contact" },
     ],
