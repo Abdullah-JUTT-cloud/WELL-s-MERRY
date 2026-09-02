@@ -134,26 +134,31 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Newsletter */}
-        <div className="border-t border-cream/10 pt-10 pb-10 text-center">
-          <h4 className="font-display text-2xl sm:text-3xl text-ivory mb-2">Subscribe to our emails</h4>
-          <p className="text-sm text-cream/60 mb-6">Be the first to know about new collections and special offers.</p>
-          <form onSubmit={handleSubscribe} className="max-w-md mx-auto flex items-end gap-3 border-b border-cream/30 pb-2">
+        {/* Newsletter — Full-bleed bold color-block moment */}
+        <div className="bg-moss rounded-xl p-8 sm:p-12 text-center -mx-2 sm:mx-0 border-[1.5px] border-ivory/15 shadow-hard">
+          <div className="w-12 h-12 mx-auto mb-4 rounded-full border-[1.5px] border-gold-3/40 flex items-center justify-center bg-ivory/10">
+            <HiOutlineEnvelope className="w-5 h-5 text-gold-3" />
+          </div>
+          <h4 className="font-display text-2xl sm:text-3xl lg:text-4xl text-ivory mb-1 font-bold">Stay in the Loop</h4>
+          <p className="font-display italic text-gold-3/80 text-base sm:text-lg mb-6">New drops, seasonal offers & botanical secrets.</p>
+          <form onSubmit={handleSubscribe} className="max-w-md mx-auto flex items-center gap-0 border-[1.5px] border-ivory/30 rounded-sm overflow-hidden shadow-hard-sm bg-ivory/5">
             <input
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email address"
-              className="flex-1 bg-transparent outline-none text-ivory placeholder:text-cream/40 text-sm py-1"
+              placeholder="Your email address"
+              className="flex-1 bg-transparent outline-none text-ivory placeholder:text-cream/40 text-sm py-3 px-4"
             />
             <button
               type="submit"
               disabled={submitting}
               aria-label="Subscribe"
-              className="text-gold-3 disabled:opacity-40 hover:translate-x-0.5 transition-transform"
+              className="bg-gold-2 text-ink font-bold uppercase text-[11px] tracking-[0.14em] px-5 py-3
+                         hover:bg-gold-3 disabled:opacity-40 transition-colors
+                         border-l-[1.5px] border-ink/30"
             >
-              <HiArrowRight className="w-5 h-5" />
+              {submitting ? "..." : "JOIN"}
             </button>
           </form>
         </div>

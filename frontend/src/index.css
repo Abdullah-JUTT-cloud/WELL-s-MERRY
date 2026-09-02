@@ -70,6 +70,50 @@
   animation: marquee 22s linear infinite;
 }
 
+/* ---- Floating bob for ambient botanical elements -------------------------
+   Gentle idle drift — used on decorative leaf/droplet SVGs scattered
+   around the hero and key sections. Respects prefers-reduced-motion
+   via the global rule in @layer base. */
+@keyframes wm-float {
+  0%, 100% {
+    transform: translateY(0) rotate(var(--float-rotate, 0deg));
+  }
+  50% {
+    transform: translateY(-10px) rotate(var(--float-rotate, 0deg));
+  }
+}
+
+@keyframes wm-float-slow {
+  0%, 100% {
+    transform: translateY(0) rotate(var(--float-rotate, 0deg));
+  }
+  50% {
+    transform: translateY(-6px) rotate(var(--float-rotate, 0deg));
+  }
+}
+
+@keyframes wm-float-drift {
+  0%, 100% {
+    transform: translate(0, 0) rotate(var(--float-rotate, 0deg));
+  }
+  33% {
+    transform: translate(4px, -8px) rotate(var(--float-rotate, 0deg));
+  }
+  66% {
+    transform: translate(-3px, -4px) rotate(var(--float-rotate, 0deg));
+  }
+}
+
+.wm-float {
+  animation: wm-float 4s ease-in-out infinite;
+}
+.wm-float-slow {
+  animation: wm-float-slow 6s ease-in-out infinite;
+}
+.wm-float-drift {
+  animation: wm-float-drift 8s ease-in-out infinite;
+}
+
 /* ==========================================================
    Skeleton loading — one shimmer definition for the whole site
    ==========================================================
@@ -134,7 +178,7 @@
   .btn {
     @apply inline-flex items-center justify-center gap-2 px-8 py-4
            text-[13px] tracking-[0.16em] uppercase font-semibold
-           rounded-sm transition-transform duration-300 ease-out
+           rounded-sm transition-all duration-300 ease-out
            disabled:opacity-40 disabled:pointer-events-none;
   }
   .btn:hover {
@@ -154,6 +198,81 @@
     @apply bg-transparent border border-ivory/40 text-ivory hover:bg-ivory hover:text-ink;
   }
 
+  /* ---- Bold Signature Style: Neo-brutalist button variants ------------
+     Confident outline + hard offset shadow for primary CTAs.
+     On press, the shadow compresses (button "pushes down"). */
+  .btn-brutalist {
+    @apply inline-flex items-center justify-center gap-2 px-7 py-3.5
+           text-[12px] tracking-[0.14em] uppercase font-bold
+           rounded-sm transition-all duration-200 ease-out
+           border-[1.5px] border-ink shadow-hard
+           bg-ink text-ivory;
+  }
+  .btn-brutalist:hover {
+    @apply shadow-hard-sm translate-x-[2px] translate-y-[2px];
+  }
+  .btn-brutalist:active {
+    @apply shadow-none translate-x-[4px] translate-y-[4px];
+  }
+  .btn-brutalist-gold {
+    @apply inline-flex items-center justify-center gap-2 px-7 py-3.5
+           text-[12px] tracking-[0.14em] uppercase font-bold
+           rounded-sm transition-all duration-200 ease-out
+           border-[1.5px] border-ink shadow-hard
+           bg-gold-2 text-ink;
+  }
+  .btn-brutalist-gold:hover {
+    @apply shadow-hard-sm translate-x-[2px] translate-y-[2px];
+  }
+  .btn-brutalist-gold:active {
+    @apply shadow-none translate-x-[4px] translate-y-[4px];
+  }
+  .btn-brutalist-outline {
+    @apply inline-flex items-center justify-center gap-2 px-7 py-3.5
+           text-[12px] tracking-[0.14em] uppercase font-bold
+           rounded-sm transition-all duration-200 ease-out
+           border-[1.5px] border-ink shadow-hard
+           bg-transparent text-ink;
+  }
+  .btn-brutalist-outline:hover {
+    @apply shadow-hard-sm translate-x-[2px] translate-y-[2px];
+  }
+  .btn-brutalist-outline:active {
+    @apply shadow-none translate-x-[4px] translate-y-[4px];
+  }
+
+  /* ---- Sticker badges --------------------------------------------------
+     Rotated pill/circle badges with ink outline + hard shadow.
+     Use with inline styles for rotation: style={{ '--sticker-rotate': '-4deg' }} */
+  .sticker-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.35rem 0.75rem;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: 1.5px solid #0e0c08;
+    box-shadow: 3px 3px 0 #0e0c08;
+    border-radius: 9999px;
+    transform: rotate(var(--sticker-rotate, -3deg));
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .sticker-badge:hover {
+    transform: rotate(var(--sticker-rotate, -3deg)) scale(1.05);
+    box-shadow: 2px 2px 0 #0e0c08;
+  }
+
+  /* ---- Spotlight vignette (for carousel active item) -------------------- */
+  .spotlight-vignette {
+    background: radial-gradient(
+      ellipse 70% 80% at 50% 50%,
+      rgba(217, 172, 71, 0.12) 0%,
+      rgba(14, 12, 8, 0) 70%
+    );
+  }
+
+  /* ---- Floating bob animation for ambient botanical elements ----------- */
   .eyebrow {
     @apply block text-[12px] tracking-widest2 uppercase text-gold-1 font-semibold;
   }
@@ -195,5 +314,18 @@
   }
   .reveal.is-visible {
     @apply opacity-100 translate-y-0;
+  }
+
+  /* ---- Horizontal scroll-snap row (for testimonials) ------------------- */
+  .scroll-snap-x {
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .scroll-snap-x::-webkit-scrollbar {
+    display: none;
+  }
+  .scroll-snap-item {
+    scroll-snap-align: center;
   }
 }
