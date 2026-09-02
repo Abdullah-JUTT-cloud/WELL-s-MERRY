@@ -7,9 +7,10 @@ import { LeafIcon } from "./icons.jsx";
 
 /* =====================================================================
    Navbar — sticky, thick-bordered top bar.
-   Left: logo block. Right: cart button (opens the side drawer via the
-   `onCartOpen` prop wired up in MerryLayout) + menu toggle that opens a
-   full-screen forest-green overlay with giant staggered links.
+   Left: logo block. Right: cart button (opens the side drawer by setting
+   CartContext's `isCartOpen` — no props threaded through the layout) +
+   menu toggle that opens a full-screen forest-green overlay with giant
+   staggered links.
    ===================================================================== */
 
 const NAV_LINKS = [
@@ -40,8 +41,8 @@ const itemVariants = {
   open: { y: 0, opacity: 1, transition: { type: "spring", stiffness: 220, damping: 24 } },
 };
 
-const Navbar = ({ onCartOpen }) => {
-  const { itemCount } = useCart();
+const Navbar = () => {
+  const { itemCount, isCartOpen, setIsCartOpen } = useCart();
   const { pathname } = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -77,7 +78,9 @@ const Navbar = ({ onCartOpen }) => {
           <div className="flex items-center gap-3 sm:gap-4">
             <button
               type="button"
-              onClick={onCartOpen}
+              onClick={() => setIsCartOpen(true)}
+              aria-controls="wm-cart-drawer"
+              aria-expanded={isCartOpen}
               aria-label={`Open cart, ${itemCount} item${itemCount === 1 ? "" : "s"}`}
               className={`relative border-4 border-merry-forest bg-merry-cream p-2 text-merry-forest shadow-hard-merry-sm sm:p-2.5 ${pressable}`}
             >
