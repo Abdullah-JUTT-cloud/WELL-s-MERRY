@@ -8,7 +8,9 @@ import {
   WavyDivider,
   RealResultsBanner,
   IngredientSpotlight,
+  RawMaterial,
   NoBsFaq,
+  TheRitual,
   CommunityGrid,
   LeafIcon,
 } from "../../components/merry/index.js";
@@ -41,11 +43,14 @@ import oilBoxStanding from "../../assets/oil-box-bottle-standing.jpg";
    The photos are studio shots on a cream backdrop, so each floater is
    framed as a bordered cream card — the photo bg melts into the frame
    and the card reads as a deliberate, brutalist collage piece. */
+/* Positions are relative to the tight collage cluster (see the inner
+   relative container in <Hero/>), so the four floaters overlap into one
+   cohesive collage rather than scattering across the whole stage. */
 const FLOATERS = [
-  { src: bottleAmber, alt: "Well's Merry organic hair oil — amber bottle", frame: "w-44 sm:w-60 lg:w-72 aspect-[3/4]", pos: "left-[6%] top-[10%] sm:top-[8%]", depth: 34, rotate: -6, bob: 16, dur: 5.2, delay: 0.15, z: "z-20" },
-  { src: bottleRust, alt: "Well's Merry Ember Elixir hair oil", frame: "w-36 sm:w-48 lg:w-60 aspect-[3/4]", pos: "right-[4%] top-[36%]", depth: 22, rotate: 7, bob: 13, dur: 6.4, delay: 0.35, z: "z-10" },
-  { src: bottleDropper, alt: "Well's Merry rosemary scalp serum dropper bottle", frame: "w-28 sm:w-36 lg:w-44 aspect-[3/4]", pos: "left-[1%] bottom-[4%]", depth: 44, rotate: -12, bob: 11, dur: 4.6, delay: 0.55, z: "z-30" },
-  { src: bottlePump, alt: "Well's Merry midnight scalp oil pump bottle", frame: "w-28 sm:w-40 lg:w-48 aspect-[3/4]", pos: "right-[24%] top-[1%]", depth: 16, rotate: 4, bob: 14, dur: 5.8, delay: 0.75, z: "z-0" },
+  { src: bottleAmber, alt: "Well's Merry organic hair oil — amber bottle", frame: "w-44 sm:w-60 lg:w-72 aspect-[3/4]", pos: "left-[0%] top-[2%]", depth: 34, rotate: -6, bob: 16, dur: 5.2, delay: 0.15, z: "z-20" },
+  { src: bottlePump, alt: "Well's Merry midnight scalp oil pump bottle", frame: "w-28 sm:w-40 lg:w-48 aspect-[3/4]", pos: "right-[2%] top-[10%]", depth: 16, rotate: 4, bob: 14, dur: 5.8, delay: 0.75, z: "z-30" },
+  { src: bottleRust, alt: "Well's Merry Ember Elixir hair oil", frame: "w-36 sm:w-48 lg:w-60 aspect-[3/4]", pos: "right-[10%] bottom-[6%]", depth: 22, rotate: 7, bob: 13, dur: 6.4, delay: 0.35, z: "z-10" },
+  { src: bottleDropper, alt: "Well's Merry rosemary scalp serum dropper bottle", frame: "w-28 sm:w-36 lg:w-44 aspect-[3/4]", pos: "left-[12%] bottom-[0%]", depth: 44, rotate: -12, bob: 11, dur: 4.6, delay: 0.55, z: "z-0" },
 ];
 
 const FloatingBottle = ({ f, px, py }) => {
@@ -218,9 +223,18 @@ const Hero = () => {
         <Blob className="right-[30%] top-[8%] h-24 w-24 bg-merry-clay/90" morph delay={3} />
         <Blob className="left-[16%] bottom-[16%] h-14 w-14 bg-merry-sage/80" delay={2} />
 
-        {FLOATERS.map((f) => (
-          <FloatingBottle key={f.src} f={f} px={px} py={py} />
-        ))}
+        {/* Floating-bottle collage — the floaters live inside a tighter
+            relative cluster (centered in the stage) so their large frames
+            overlap into one cohesive collage instead of scattering as
+            disconnected floating assets. Parallax still applies per
+            floater via the transform on <FloatingBottle/>. */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="relative h-[78%] w-[78%] max-w-[28rem]">
+            {FLOATERS.map((f) => (
+              <FloatingBottle key={f.src} f={f} px={px} py={py} />
+            ))}
+          </div>
+        </div>
 
         {/* stamp */}
         <motion.div
@@ -329,6 +343,11 @@ const Home = () => {
           Macro image left, "NO SECRETS. JUST SCIENCE." + 2×2 proof grid right. */}
       <IngredientSpotlight />
 
+      {/* Flow 6b — TRUST BLOCK B+: the raw material.
+          Forest band, 2×4 bento of macro ingredient specimens that reveal
+          their scalp benefit on hover — the visual proof behind "no secrets". */}
+      <RawMaterial />
+
       {/* Flow 7 — TRUST BLOCK C: objection handling.
           Cream band, sticky "QUESTIONS? GOOD." headline + chunky accordion. */}
       <NoBsFaq />
@@ -336,6 +355,11 @@ const Home = () => {
       {/* Flow 8 — TRUST BLOCK D: community proof.
           Forest band, asymmetric bento wall of UGC + stylized reviews. */}
       <CommunityGrid />
+
+      {/* Flow 8b — THE RITUAL: application guide.
+          Cream band, sticky "THE RITUAL. THREE STEPS." headline + three
+          massive how-to cards, closing on the "SHOP THE OIL" CTA. */}
+      <TheRitual />
 
       {/* Hand-off into the footer's clay newsletter band */}
       <WavyDivider from="forest" to="clay" variant="swell" />
