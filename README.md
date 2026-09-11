@@ -1,5 +1,5 @@
 # WELL-s-MERRY
-
+Live URL: https://well-s-merry.vercel.app/
 Organic hair & beauty care — Vite/React storefront with a Node/Express + MongoDB API.
 
 | | |
