@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { Fragment, useCallback, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { HiXMark, HiOutlineTrash, HiMinus, HiPlus } from "react-icons/hi2";
@@ -11,7 +11,9 @@ import { LeafIcon, BottleIcon } from "./icons.jsx";
    so it stays in sync with every MagneticProductCard quick-add.
 
    Open/close state lives in CartContext (`isCartOpen`) — NOT in this
-   component and NOT in a prop threaded down from the layout. That is a
+   component and NOT in a prop threaded down from the layout. The
+   backdrop + panel render inside one keyed <Fragment> so AnimatePresence
+   always tracks the exiting pair as a single child. That is a
    deliberate fix: the drawer used to depend on an `onClose` prop, so any
    render path that missed it produced a panel whose "X" was dead. Every
    exit below is the same explicit `setIsCartOpen(false)`:
@@ -82,7 +84,7 @@ const CartDrawer = () => {
   return (
     <AnimatePresence>
       {isCartOpen && (
-        <>
+        <Fragment key="cart-drawer">
           {/* Backdrop — clicking anywhere outside the panel closes it. */}
           <motion.button
             type="button"
@@ -238,7 +240,7 @@ const CartDrawer = () => {
               </div>
             )}
           </motion.aside>
-        </>
+        </Fragment>
       )}
     </AnimatePresence>
   );
